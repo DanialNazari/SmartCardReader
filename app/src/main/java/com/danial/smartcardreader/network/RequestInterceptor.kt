@@ -1,6 +1,5 @@
 package com.danial.smartcardreader.network
 
-import com.orhanobut.hawk.Hawk
 import okhttp3.Interceptor
 import okhttp3.Response
 import timber.log.Timber

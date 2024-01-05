@@ -11,15 +11,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import timber.log.Timber;
+
 public class FilePath {
 
 
-    public static File getFile(Context context, Uri uri) throws IOException {
+    public static File getFile(Context context, Uri uri) {
         File destinationFilename = new File(context.getFilesDir().getPath() + File.separatorChar + queryName(context, uri));
         try (InputStream ins = context.getContentResolver().openInputStream(uri)) {
             createFileFromStream(ins, destinationFilename);
         } catch (Exception ex) {
-            Log.e("Save File", ex.getMessage());
+            Timber.tag("Save File").e(ex);
             ex.printStackTrace();
         }
         return destinationFilename;
@@ -34,7 +36,7 @@ public class FilePath {
             }
             os.flush();
         } catch (Exception ex) {
-            Log.e("Save File", ex.getMessage());
+            Timber.tag("Save File").e(ex);
             ex.printStackTrace();
         }
     }

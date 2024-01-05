@@ -23,7 +23,7 @@ open class BaseRepository{
     }
 
     private fun convertStringToViewStateError(code:Int, jsonString:String?):ViewState<Nothing>{
-        val json =JSONTokener(jsonString).nextValue();
+        val json =JSONTokener(jsonString).nextValue()
         return if (json is JSONObject) {
             val errorResponseModel = convertStringToError(jsonString)
             ViewState.ServerError(code, listOf(errorResponseModel))
