@@ -65,38 +65,39 @@ private fun ContentView(
     addNewItem: () -> Unit
 ) {
 
-    Scaffold(topBar = {
-        CustomAppBar(
-            title = "Cards list",
-            disableBackButton = true,
-            onBackPressed = {})
-    }, content = {
-        Box(Modifier.padding(it)) {
-            Column(Modifier.fillMaxHeight()) {
-                cardsList.forEach {
-                    CardItem(it)
+    Scaffold(
+        topBar = {
+            CustomAppBar(
+                title = "Cards list",
+                disableBackButton = true,
+                onBackPressed = {})
+        }, content = {
+            Box(Modifier.padding(it)) {
+                Column(Modifier.fillMaxHeight()) {
+                    cardsList.forEach {
+                        CardItem(it)
+                    }
                 }
-            }
-            FloatingActionButton(
-                onClick = addNewItem,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = android.R.drawable.ic_menu_add),
-                    contentDescription = "Add new card"
-                )
-            }
-            if (isLoading) {
-                Box(
+                FloatingActionButton(
+                    onClick = addNewItem,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = Color(0xC6FFFFFF))
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+                    Icon(
+                        painter = painterResource(id = android.R.drawable.ic_menu_add),
+                        contentDescription = "Add new card"
+                    )
+                }
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = Color(0xC6FFFFFF))
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+                    }
                 }
             }
-        }
-    })
+        })
 }
