@@ -1,7 +1,6 @@
 package com.danial.smartcardreader
 
 import android.content.Context
-import android.content.ContextWrapper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
