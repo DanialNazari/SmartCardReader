@@ -18,7 +18,9 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
 
     override fun attachBaseContext(newBase: Context?) {
-        val localeUpdatedContext = newBase?.let { ContextUtils.updateLocale(it, Locale("en")) }
+        val localeUpdatedContext = newBase?.let {
+            ContextUtils.updateLocale(it, Locale("en"))
+        }
         super.attachBaseContext(localeUpdatedContext)
     }
 

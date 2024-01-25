@@ -22,6 +22,12 @@ android {
         }
 
         buildConfigField "String", "BASE_URL", "\"https://api.ocr.space\""
+
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+
+        buildConfigField "String", "OCR_API_KEY", "\"${properties.getProperty("OCR_API_KEY")}\""
+
     }
 
     buildTypes {

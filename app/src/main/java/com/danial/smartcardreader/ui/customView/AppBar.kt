@@ -21,9 +21,8 @@ import com.danial.smartcardreader.R
 fun CustomAppBar(
     title: String, secondButtonIcon: Int? = null,
     backgroundColor: Color = MaterialTheme.colorScheme.primary,
-    disableBackButton: Boolean = false,
     onSecondButtonPressed: (() -> Unit)? = null,
-    onBackPressed: (() -> Unit)
+    onBackPressed: (() -> Unit)? = null
 ) {
     Row(
         Modifier
@@ -51,7 +50,7 @@ fun CustomAppBar(
                 )
             }
         }
-        if (!disableBackButton) {
+        if (onBackPressed!=null) {
             IconButton(onClick = {
                 onBackPressed()
             }) {

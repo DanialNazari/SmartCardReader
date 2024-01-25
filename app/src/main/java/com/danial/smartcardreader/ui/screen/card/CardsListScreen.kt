@@ -20,12 +20,24 @@ import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.ui.customView.CustomAppBar
+import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 
 @Composable
 @Preview
 fun CardsListScreenPreview() {
-    val cardsList = listOf(CardItemModel(number = "50222912365455588", sheba = "121212121212"))
-    ContentView(isLoading = false, cardsList = cardsList, addNewItem = {})
+    SmartCardReaderTheme {
+        val cardsList = listOf(
+            CardItemModel(
+                number = "50222912365455588",
+                sheba = "121212121212"
+            )
+        )
+        ContentView(
+            isLoading = false,
+            cardsList = cardsList,
+            addNewItem = {}
+        )
+    }
 }
 
 @Composable
@@ -50,9 +62,12 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
         viewModel.messageStateFlow.value = null
     }
 
-    ContentView(isLoading = viewModel.isLoading, cardsList = viewModel.cardsList, addNewItem = {
-        galleryLauncher.launch("image/*")
-    })
+    ContentView(
+        isLoading = viewModel.isLoading,
+        cardsList = viewModel.cardsList,
+        addNewItem = {
+            galleryLauncher.launch("image/*")
+        })
 
 
 }
@@ -68,9 +83,8 @@ private fun ContentView(
     Scaffold(
         topBar = {
             CustomAppBar(
-                title = "Cards list",
-                disableBackButton = true,
-                onBackPressed = {})
+                title = "Cards list"
+            )
         }, content = {
             Box(Modifier.padding(it)) {
                 Column(Modifier.fillMaxHeight()) {

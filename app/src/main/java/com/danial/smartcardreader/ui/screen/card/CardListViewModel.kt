@@ -17,7 +17,7 @@ import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
-class CardListViewModel @Inject constructor(val cardListRepository: CardListRepository) :
+class CardListViewModel @Inject constructor(private val cardListRepository: CardListRepository) :
 	ViewModel() {
 
 	var isLoading by mutableStateOf(false)
@@ -65,6 +65,8 @@ class CardListViewModel @Inject constructor(val cardListRepository: CardListRepo
 									val cardItemModel = CardItemModel(number = cardNumber !!, sheba = shebaNumber)
 									cardsList.add(cardItemModel)
 									Hawk.put("cards_list", cardsList)
+								}else{
+									messageStateFlow.value = MessageModel("OCR api did get any valuable response")
 								}
 							}
 						}
