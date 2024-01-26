@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Smart Card Reader</string>
+    <string name="delete_item">Delete Item</string>
+    <string name="delete_item_desc">Do you want delete this item?</string>
 </resources>

@@ -18,91 +18,99 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CardListViewModel @Inject constructor(private val cardListRepository: CardListRepository) :
-	ViewModel() {
+    ViewModel() {
 
-	var isLoading by mutableStateOf(false)
-	val messageStateFlow = mutableStateOf<MessageModel?>(null)
-	val cardsList = mutableListOf<CardItemModel>()
+    var isLoading by mutableStateOf(false)
+    val messageStateFlow = mutableStateOf<MessageModel?>(null)
+    val cardsList = mutableListOf<CardItemModel>()
 
-	init {
-		getCardListFromCache()
-	}
+    init {
+        getCardListFromCache()
+    }
 
-	private fun getCardListFromCache() {
-		cardsList.clear()
-		Hawk.get<List<CardItemModel>>("cards_list")?.let {
-			cardsList.addAll(it)
-		}
-	}
+    private fun getCardListFromCache() {
+        cardsList.clear()
+        Hawk.get<List<CardItemModel>>("cards_list")?.let {
+            cardsList.addAll(it)
+        }
+    }
 
-
-	fun parseImage(file: File) {
-		viewModelScope.launch {
-			cardListRepository.parsImage(file).collect {
-				when (it) {
-					is ViewState.Success -> {
-						isLoading = false
-
-						val textRecognitionResponseModel: TextRecognitionResponseModel =
-							it.data as TextRecognitionResponseModel
-						if (! textRecognitionResponseModel.ParsedResults.isNullOrEmpty()) {
-							textRecognitionResponseModel.ParsedResults[0]?.let {parsedResults->
-								val lines = parsedResults.ParsedText?.replace(" ","")?.split("\r\n")
-								var cardNumber: String? = null
-								var shebaNumber: String? = null
-								lines?.forEach { line ->
-
-									if (line.isNotEmpty()) {
-										if (line.length == 16) {
-											cardNumber = line
-										} else if (line.substring(0, 2) == "IR") {
-											shebaNumber = line
-										}
-									}
-
-								}
-								if (cardNumber?.isNotEmpty() == true) {
-									val cardItemModel = CardItemModel(number = cardNumber !!, sheba = shebaNumber)
-									cardsList.add(cardItemModel)
-									Hawk.put("cards_list", cardsList)
-								}else{
-									messageStateFlow.value = MessageModel("OCR api did get any valuable response")
-								}
-							}
-						}
-
-					}
-					is ViewState.Loading -> {
-						isLoading = true
-					}
-					is ViewState.Error -> {
-						isLoading = false
-						messageStateFlow.value = MessageModel(it.message)
-					}
-					is ViewState.ConnectionError -> {
-						isLoading = false
-						messageStateFlow.value = MessageModel("Connection Error")
+    fun deleteItem(item: CardItemModel) {
+        cardsList.remove(item)
+        Hawk.put("cards_list", cardsList)
+    }
 
 
-					}
-					is ViewState.ServerError -> {
-						isLoading = false
-						if (it.errors.isNullOrEmpty()) {
-							messageStateFlow.value = MessageModel("Unknown Server Error")
-						} else {
-							messageStateFlow.value = MessageModel(
-								it.errors[0]?.error ?: "Unknown Server Error"
-							)
-						}
-					}
-					is ViewState.UnknownError -> {
-						isLoading = false
-						messageStateFlow.value = MessageModel("Unknown Error")
-					}
-				}
-			}
-		}
-	}
+    fun parseImage(file: File) {
+        viewModelScope.launch {
+            cardListRepository.parsImage(file).collect {
+                when (it) {
+                    is ViewState.Success -> {
+                        isLoading = false
+
+                        val textRecognitionResponseModel: TextRecognitionResponseModel =
+                            it.data as TextRecognitionResponseModel
+                        if (!textRecognitionResponseModel.ParsedResults.isNullOrEmpty()) {
+                            textRecognitionResponseModel.ParsedResults[0]?.let { parsedResults ->
+                                val lines = parsedResults.ParsedText?.replace(" ", "")?.split("\r\n")
+                                var cardNumber: String? = null
+                                var shebaNumber: String? = null
+                                lines?.forEach { line ->
+
+                                    if (line.isNotEmpty()) {
+                                        if (line.length == 16) {
+                                            cardNumber = line
+                                        } else if (line.substring(0, 2) == "IR") {
+                                            shebaNumber = line
+                                        }
+                                    }
+
+                                }
+                                if (cardNumber?.isNotEmpty() == true) {
+                                    val cardItemModel = CardItemModel(number = cardNumber!!, sheba = shebaNumber)
+                                    cardsList.add(cardItemModel)
+                                    Hawk.put("cards_list", cardsList)
+                                } else {
+                                    messageStateFlow.value = MessageModel("OCR api did get any valuable response")
+                                }
+                            }
+                        }
+
+                    }
+
+                    is ViewState.Loading -> {
+                        isLoading = true
+                    }
+
+                    is ViewState.Error -> {
+                        isLoading = false
+                        messageStateFlow.value = MessageModel(it.message)
+                    }
+
+                    is ViewState.ConnectionError -> {
+                        isLoading = false
+                        messageStateFlow.value = MessageModel("Connection Error")
 
 
+                    }
+
+                    is ViewState.ServerError -> {
+                        isLoading = false
+                        if (it.errors.isNullOrEmpty()) {
+                            messageStateFlow.value = MessageModel("Unknown Server Error")
+                        } else {
+                            messageStateFlow.value = MessageModel(
+                                it.errors[0]?.error ?: "Unknown Server Error"
+                            )
+                        }
+                    }
+
+                    is ViewState.UnknownError -> {
+                        isLoading = false
+                        messageStateFlow.value = MessageModel("Unknown Error")
+                    }
+                }
+            }
+        }
+    }
 }

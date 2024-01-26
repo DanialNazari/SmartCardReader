@@ -17,7 +17,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.danial.smartcardreader.ui.utils.FilePath
 import androidx.compose.material3.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.ui.customView.CustomAppBar
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
@@ -35,7 +41,8 @@ fun CardsListScreenPreview() {
         ContentView(
             isLoading = false,
             cardsList = cardsList,
-            addNewItem = {}
+            addNewItem = {},
+            deleteItem = {}
         )
     }
 }
@@ -67,6 +74,9 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
         cardsList = viewModel.cardsList,
         addNewItem = {
             galleryLauncher.launch("image/*")
+        },
+        deleteItem = {
+            viewModel.deleteItem(it)
         })
 
 
@@ -77,8 +87,22 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
 private fun ContentView(
     isLoading: Boolean,
     cardsList: List<CardItemModel>,
-    addNewItem: () -> Unit
+    addNewItem: () -> Unit,
+    deleteItem: (CardItemModel) -> Unit
 ) {
+
+    var itemForDelete: CardItemModel? by remember { mutableStateOf(null) }
+
+    itemForDelete?.let {
+        DeleteItemDialog(
+            onConfirmation = {
+                deleteItem(it)
+                itemForDelete = null
+            }, onDismissRequest = {
+                itemForDelete = null
+            })
+    }
+
 
     Scaffold(
         topBar = {
@@ -88,8 +112,12 @@ private fun ContentView(
         }, content = {
             Box(Modifier.padding(it)) {
                 Column(Modifier.fillMaxHeight()) {
-                    cardsList.forEach {
-                        CardItem(it)
+                    cardsList.forEach { cardItem ->
+                        CardItem(
+                            cardItem = cardItem,
+                            onDeleteItemClicked = {
+                                itemForDelete = cardItem
+                            })
                     }
                 }
                 FloatingActionButton(
@@ -114,4 +142,37 @@ private fun ContentView(
                 }
             }
         })
+}
+
+@Composable
+private fun DeleteItemDialog(onConfirmation: () -> Unit, onDismissRequest: () -> Unit) {
+    AlertDialog(
+        title = {
+            Text(text = stringResource(id = R.string.delete_item))
+        },
+        text = {
+            Text(text = stringResource(id = R.string.delete_item_desc))
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Confirm", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Dismiss")
+            }
+        }
+    )
 }
