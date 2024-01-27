@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.ui.customView.CustomAppBar
+import com.danial.smartcardreader.ui.screen.card.components.CardItem
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 
 @Composable

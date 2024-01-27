@@ -1,4 +1,4 @@
-package com.danial.smartcardreader.ui.screen.card
+package com.danial.smartcardreader.ui.screen.card.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
