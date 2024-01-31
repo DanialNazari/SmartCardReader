@@ -1,5 +1,6 @@
-package com.danial.smartcardreader.ui.screen.card.components
+package com.danial.smartcardreader.ui.screen.card.widgets
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,19 +17,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.danial.smartcardreader.ui.widgets.CustomTextFiled
 
 @Composable
-fun MinimalDialog(
-    onConfirm: () -> Unit,
+fun AddCardItemDialog(
+    onConfirm: (String) -> Unit,
     onDismissRequest: () -> Unit
 ) {
 
     var title: String by remember {
         mutableStateOf("")
     }
+
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -38,21 +42,23 @@ fun MinimalDialog(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(text = "Enter the card tile:")
-                TextField(
+                CustomTextFiled(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(40.dp)
                         .padding(top = 8.dp),
                     value = title,
                     onValueChange = {
                         title = it
                     },
-                    placeholder = {
-                        Text(text = "Card title ...")
-                    })
+                    hint = "Card title ..."
+                )
                 Button(modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = 8.dp), onClick = { }) {
+                    .padding(top = 8.dp),
+                    enabled = title.isNotEmpty(),
+                    onClick = {
+                        onConfirm(title)
+                    }) {
                     Text(text = "Confirm")
                 }
             }
@@ -63,7 +69,7 @@ fun MinimalDialog(
 @Composable
 @Preview
 private fun Preview() {
-    MinimalDialog(
+    AddCardItemDialog(
         onConfirm = {},
         onDismissRequest = {}
     )

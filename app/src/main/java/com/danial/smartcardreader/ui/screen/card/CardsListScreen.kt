@@ -26,7 +26,8 @@ import androidx.compose.ui.res.stringResource
 import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.ui.customView.CustomAppBar
-import com.danial.smartcardreader.ui.screen.card.components.CardItem
+import com.danial.smartcardreader.ui.screen.card.widgets.AddCardItemDialog
+import com.danial.smartcardreader.ui.screen.card.widgets.CardItem
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 
 @Composable
@@ -35,6 +36,7 @@ fun CardsListScreenPreview() {
     SmartCardReaderTheme {
         val cardsList = listOf(
             CardItemModel(
+                label = "Pasargad",
                 number = "50222912365455588",
                 sheba = "121212121212"
             )
@@ -79,6 +81,17 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
         deleteItem = {
             viewModel.deleteItem(it)
         })
+
+    if (viewModel.addCardResult.value != null) {
+        AddCardItemDialog(
+            onConfirm = {
+                viewModel.addItem(viewModel.addCardResult.value!!.copy(label = it))
+                viewModel.addCardResult.value = null
+            },
+            onDismissRequest = {
+                viewModel.addCardResult.value = null
+            })
+    }
 
 
 }

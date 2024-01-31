@@ -22,7 +22,9 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
 
     var isLoading by mutableStateOf(false)
     val messageStateFlow = mutableStateOf<MessageModel?>(null)
+
     val cardsList = mutableListOf<CardItemModel>()
+    val addCardResult = mutableStateOf<CardItemModel?>(null)
 
     init {
         getCardListFromCache()
@@ -35,6 +37,10 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         }
     }
 
+    fun addItem(item: CardItemModel) {
+        cardsList.add(item)
+        Hawk.put("cards_list", cardsList)
+    }
     fun deleteItem(item: CardItemModel) {
         cardsList.remove(item)
         Hawk.put("cards_list", cardsList)
@@ -68,8 +74,7 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                                 }
                                 if (cardNumber?.isNotEmpty() == true) {
                                     val cardItemModel = CardItemModel(number = cardNumber!!, sheba = shebaNumber)
-                                    cardsList.add(cardItemModel)
-                                    Hawk.put("cards_list", cardsList)
+                                    addCardResult.value = cardItemModel
                                 } else {
                                     messageStateFlow.value = MessageModel("OCR api did get any valuable response")
                                 }

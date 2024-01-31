@@ -3,7 +3,7 @@ package com.danial.smartcardreader.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val md_theme_light_primary = Color(0xFF005CBB)
-val md_theme_light_onPrimary = Color(0xFFFFFFFF)
+val md_theme_light_onPrimary = Color(0xFF242222)
 val md_theme_light_primaryContainer = Color(0xFFD7E3FF)
 val md_theme_light_onPrimaryContainer = Color(0xFF001B3F)
 val md_theme_light_secondary = Color(0xFF565E71)

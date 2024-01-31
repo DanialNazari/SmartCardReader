@@ -2,6 +2,7 @@ package com.danial.smartcardreader.repository
 
 import android.content.Context
 import com.danial.smartcardreader.di.IoDispatcher
+import com.danial.smartcardreader.model.TextRecognitionResponseModel
 import com.danial.smartcardreader.network.ApiService
 import com.danial.smartcardreader.ui.utils.ViewState
 import com.danial.smartcardreader.ui.utils.isNetworkAvailable
@@ -20,34 +21,51 @@ import javax.inject.Singleton
 
 @Singleton
 class CardListRepository @Inject constructor(
-	private val api: ApiService,
-	private val context: Context,
-	@IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    private val api: ApiService,
+    private val context: Context,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : BaseRepository() {
 
 
-	fun parsImage(file:File): Flow<ViewState<Any>> = flow {
+    fun parsImage(file: File): Flow<ViewState<Any>> = flow {
 
-		val request: MultipartBody.Part = MultipartBody.Part.createFormData(
-			name = "file",
-			filename = file.name,
-			body = file.asRequestBody()
-		)
+        val request: MultipartBody.Part = MultipartBody.Part.createFormData(
+            name = "file",
+            filename = file.name,
+            body = file.asRequestBody()
+        )
 
-		emit(ViewState.Loading)
-		if (context.isNetworkAvailable()) {
-			try {
+        emit(ViewState.Loading)
 
-				val response = api.parsImage(request)
-				emit(ViewState.Success(response))
+        if (context.isNetworkAvailable()) {
+            try {
 
-			} catch (e: Exception) {
-				emit(checkResponseError(e))
-			}
-		} else {
-			emit(ViewState.ConnectionError)
-		}
+                val response = api.parsImage(request)
+                emit(ViewState.Success(response))
 
-	}.flowOn(ioDispatcher).catch { Timber.e(it) }
+            } catch (e: Exception) {
+                emit(checkResponseError(e))
+            }
+        } else {
+            emit(ViewState.ConnectionError)
+        }
+
+        // mock data
+        /*emit(
+            ViewState.Success(
+                data = mockData
+            )
+        )*/
+
+
+    }.flowOn(ioDispatcher).catch { Timber.e(it) }
+
+
+    private val mockData = TextRecognitionResponseModel(
+        ParsedResults = arrayListOf(
+            TextRecognitionResponseModel.ParsedResult(ParsedText = "5022291307412589"),
+            TextRecognitionResponseModel.ParsedResult(ParsedText = "IR502229130741258914523698")
+        )
+    )
 
 }

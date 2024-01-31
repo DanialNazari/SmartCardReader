@@ -1,10 +1,11 @@
-package com.danial.smartcardreader.ui.screen.card.components
+package com.danial.smartcardreader.ui.screen.card.widgets
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.magnifier
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
+import com.danial.smartcardreader.ui.widgets.CustomText
 
 @Composable
 fun CardItem(cardItem: CardItemModel, onDeleteItemClicked: () -> Unit) {
@@ -38,10 +40,19 @@ fun CardItem(cardItem: CardItemModel, onDeleteItemClicked: () -> Unit) {
                     .fillMaxWidth()
                     .weight(1f)
             ) {
+                cardItem.label?.let {
+                    CustomText(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = it
+                    )
+                }
+
                 Text(text = cardItem.number)
+
                 if (cardItem.sheba != null) {
                     Text(text = cardItem.sheba, color = Color.Gray, fontSize = 10.sp)
                 }
+
             }
 
             Image(
@@ -61,7 +72,11 @@ fun CardItem(cardItem: CardItemModel, onDeleteItemClicked: () -> Unit) {
 @Composable
 @Preview
 fun CardItemPreview() {
-    CardItem(CardItemModel(number = "3354778566954411", sheba = "IR3354778566954411"),
+    CardItem(CardItemModel(
+        label = "Pasargad",
+        number = "3354778566954411",
+        sheba = "IR3354778566954411"
+    ),
         onDeleteItemClicked = {}
     )
 }
