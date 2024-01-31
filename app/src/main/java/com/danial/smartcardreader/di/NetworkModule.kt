@@ -1,8 +1,8 @@
 package com.danial.smartcardreader.di
 
+import com.danial.smartcardreader.BuildConfig
 import com.danial.smartcardreader.network.ApiService
 import com.danial.smartcardreader.network.RequestInterceptor
-import com.danial.smartcardreader.BuildConfig
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
