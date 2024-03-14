@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danial.smartcardreader.R
+import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 
 @Composable
 fun CustomAppBar(
@@ -74,5 +75,7 @@ fun CustomAppBar(
 @Preview
 @Composable
 private fun Preview() {
-    CustomAppBar(title = "Skin type calculator", onBackPressed = {})
+    SmartCardReaderTheme(darkTheme = true) {
+        CustomAppBar(title = "Skin type calculator", onBackPressed = {})
+    }
 }

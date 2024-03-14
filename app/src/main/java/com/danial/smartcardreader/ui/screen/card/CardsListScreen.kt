@@ -33,7 +33,7 @@ import com.danial.smartcardreader.ui.utils.FilePath
 @Composable
 @Preview
 fun CardsListScreenPreview() {
-    SmartCardReaderTheme {
+    SmartCardReaderTheme(darkTheme = false) {
         val cardsList = listOf(
             CardItemModel(
                 label = "Pasargad",
@@ -121,11 +121,14 @@ private fun ContentView(
     Scaffold(
         topBar = {
             CustomAppBar(
-                title = "Cards list"
+                title = "Cards list",
             )
         }, content = {
             Box(Modifier.padding(it)) {
-                Column(Modifier.fillMaxHeight()) {
+                Column(
+                    Modifier
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.background)) {
                     cardsList.forEach { cardItem ->
                         CardItem(
                             cardItem = cardItem,

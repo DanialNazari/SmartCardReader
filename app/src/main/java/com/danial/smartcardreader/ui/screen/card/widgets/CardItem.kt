@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
+import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.widgets.CustomText
 
 @Composable
@@ -33,9 +35,14 @@ fun CardItem(cardItem: CardItemModel, onDeleteItemClicked: () -> Unit) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .background(shape = RoundedCornerShape(12.dp), color = Color.White)
+                .background(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface
+                )
                 .border(
-                    1.dp, color = Color.Gray, RoundedCornerShape(12.dp)
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(12.dp)
                 )
                 .padding(16.dp)
         ) {
@@ -47,14 +54,15 @@ fun CardItem(cardItem: CardItemModel, onDeleteItemClicked: () -> Unit) {
                 cardItem.label?.let {
                     CustomText(
                         modifier = Modifier.padding(bottom = 8.dp),
-                        text = it
+                        text = it,
+                        textStyle = MaterialTheme.typography.titleLarge
                     )
                 }
 
-                Text(text = cardItem.number)
+                Text(text = cardItem.number, color = MaterialTheme.colorScheme.onSurface)
 
                 if (cardItem.sheba != null) {
-                    Text(text = cardItem.sheba, color = Color.Gray, fontSize = 10.sp)
+                    Text(text = cardItem.sheba, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                 }
 
             }
@@ -76,11 +84,13 @@ fun CardItem(cardItem: CardItemModel, onDeleteItemClicked: () -> Unit) {
 @Composable
 @Preview
 fun CardItemPreview() {
-    CardItem(CardItemModel(
-        label = "Pasargad",
-        number = "3354778566954411",
-        sheba = "IR3354778566954411"
-    ),
-        onDeleteItemClicked = {}
-    )
+    SmartCardReaderTheme(darkTheme = true) {
+        CardItem(CardItemModel(
+            label = "Pasargad",
+            number = "3354778566954411",
+            sheba = "IR3354778566954411"
+        ),
+            onDeleteItemClicked = {}
+        )
+    }
 }
