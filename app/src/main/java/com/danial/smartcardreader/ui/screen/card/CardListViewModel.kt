@@ -12,6 +12,9 @@ import com.danial.smartcardreader.repository.CardListRepository
 import com.danial.smartcardreader.ui.utils.ViewState
 import com.orhanobut.hawk.Hawk
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -20,30 +23,35 @@ import javax.inject.Inject
 class CardListViewModel @Inject constructor(private val cardListRepository: CardListRepository) :
     ViewModel() {
 
-    var isLoading by mutableStateOf(false)
-    val messageStateFlow = mutableStateOf<MessageModel?>(null)
-
-    val cardsList = mutableListOf<CardItemModel>()
-    val addCardResult = mutableStateOf<CardItemModel?>(null)
+    private var _uiState = MutableStateFlow(CardListUIState())
+    val uiState: StateFlow<CardListUIState>
+        get() = _uiState.asStateFlow()
 
     init {
         getCardListFromCache()
     }
 
     private fun getCardListFromCache() {
-        cardsList.clear()
+        uiState.value.cardsList?.clear()
         Hawk.get<List<CardItemModel>>("cards_list")?.let {
-            cardsList.addAll(it)
+            uiState.value.cardsList?.addAll(it)
         }
+
+        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
     }
 
     fun addItem(item: CardItemModel) {
-        cardsList.add(item)
-        Hawk.put("cards_list", cardsList)
+        uiState.value.cardsList?.add(item)
+        Hawk.put("cards_list", uiState.value.cardsList)
+
+        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
     }
+
     fun deleteItem(item: CardItemModel) {
-        cardsList.remove(item)
-        Hawk.put("cards_list", cardsList)
+        uiState.value.cardsList?.remove(item)
+        Hawk.put("cards_list", uiState.value.cardsList)
+
+        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
     }
 
 
@@ -52,7 +60,7 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
             cardListRepository.parsImage(file).collect {
                 when (it) {
                     is ViewState.Success -> {
-                        isLoading = false
+                        _uiState.value = _uiState.value.copy(showLoading = true)
 
                         val textRecognitionResponseModel: TextRecognitionResponseModel =
                             it.data as TextRecognitionResponseModel
@@ -74,9 +82,9 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                                 }
                                 if (cardNumber?.isNotEmpty() == true) {
                                     val cardItemModel = CardItemModel(number = cardNumber!!, sheba = shebaNumber)
-                                    addCardResult.value = cardItemModel
+                                    _uiState.value = _uiState.value.copy(addCardResult = cardItemModel)
                                 } else {
-                                    messageStateFlow.value = MessageModel("OCR api did get any valuable response")
+                                    _uiState.value = _uiState.value.copy(message = MessageModel.ServerError("OCR api did get any valuable response"))
                                 }
                             }
                         }
@@ -84,38 +92,37 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                     }
 
                     is ViewState.Loading -> {
-                        isLoading = true
+                        _uiState.value = _uiState.value.copy(showLoading = true)
                     }
 
                     is ViewState.Error -> {
-                        isLoading = false
-                        messageStateFlow.value = MessageModel(it.message)
+                        _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.Message(it.message))
                     }
 
                     is ViewState.ConnectionError -> {
-                        isLoading = false
-                        messageStateFlow.value = MessageModel("Connection Error")
-
-
+                        _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.ConnectionError())
                     }
 
                     is ViewState.ServerError -> {
-                        isLoading = false
                         if (it.errors.isNullOrEmpty()) {
-                            messageStateFlow.value = MessageModel("Unknown Server Error")
+                            _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.ServerError())
                         } else {
-                            messageStateFlow.value = MessageModel(
-                                it.errors[0]?.error ?: "Unknown Server Error"
-                            )
+                            _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.ServerError(it.errors[0]?.error ?: "Unknown Server Error"))
                         }
                     }
 
                     is ViewState.UnknownError -> {
-                        isLoading = false
-                        messageStateFlow.value = MessageModel("Unknown Error")
+                        _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.UnknownError())
                     }
                 }
             }
         }
     }
+
+    data class CardListUIState(
+        val showLoading: Boolean = false,
+        val message: MessageModel? = null,
+        val cardsList: ArrayList<CardItemModel>? = null,
+        val addCardResult: CardItemModel? = null
+    )
 }

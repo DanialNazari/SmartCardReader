@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
+import com.danial.smartcardreader.model.MessageModel
 import com.danial.smartcardreader.ui.customView.CustomAppBar
 import com.danial.smartcardreader.ui.screen.card.widgets.AddCardItemDialog
 import com.danial.smartcardreader.ui.screen.card.widgets.CardItem
@@ -63,18 +65,51 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
             }
         }
 
-    if (viewModel.messageStateFlow.value != null) {
-        if (!viewModel.messageStateFlow.value?.description.isNullOrEmpty()) {
-            Toast.makeText(
-                activity, viewModel.messageStateFlow.value?.description, Toast.LENGTH_LONG
-            ).show()
+    LaunchedEffect(key1 = viewModel.uiState) {
+        if (viewModel.uiState.value.message != null) {
+            val message = when (viewModel.uiState.value.message) {
+                is MessageModel.Message -> {
+                    (viewModel.uiState.value.message as MessageModel.Message).message
+                }
+
+                is MessageModel.ServerError -> {
+                    (viewModel.uiState.value.message as MessageModel.ServerError).message
+                }
+
+                is MessageModel.ConnectionError -> {
+                    (viewModel.uiState.value.message as MessageModel.ConnectionError).message
+                }
+
+                is MessageModel.UnknownError -> {
+                    (viewModel.uiState.value.message as MessageModel.UnknownError).message
+                }
+
+                null -> {null}
+            }
+            message?.let {
+                Toast.makeText(
+                    activity, it, Toast.LENGTH_LONG
+                ).show()
+            }
+
         }
-        viewModel.messageStateFlow.value = null
+
+        if (viewModel.uiState.value.addCardResult != null) {
+            AddCardItemDialog(
+                onConfirm = {
+                    viewModel.addItem(viewModel.addCardResult.value!!.copy(label = it))
+                    viewModel.addCardResult.value = null
+                },
+                onDismissRequest = {
+                    viewModel.addCardResult.value = null
+                })
+        }
+
     }
 
     ContentView(
-        isLoading = viewModel.isLoading,
-        cardsList = viewModel.cardsList,
+        isLoading = viewModel.uiState.value.showLoading,
+        cardsList = viewModel.uiState.value.cardsList,
         addNewItem = {
             galleryLauncher.launch("image/*")
         },
@@ -82,16 +117,7 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
             viewModel.deleteItem(it)
         })
 
-    if (viewModel.addCardResult.value != null) {
-        AddCardItemDialog(
-            onConfirm = {
-                viewModel.addItem(viewModel.addCardResult.value!!.copy(label = it))
-                viewModel.addCardResult.value = null
-            },
-            onDismissRequest = {
-                viewModel.addCardResult.value = null
-            })
-    }
+
 
 
 }
@@ -128,7 +154,8 @@ private fun ContentView(
                 Column(
                     Modifier
                         .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.background)) {
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
                     cardsList.forEach { cardItem ->
                         CardItem(
                             cardItem = cardItem,
