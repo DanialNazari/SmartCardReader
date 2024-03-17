@@ -2,4 +2,6 @@
     <string name="app_name">Smart Card Reader</string>
     <string name="delete_item">Delete Item</string>
     <string name="delete_item_desc">Do you want delete this item?</string>
+    <string name="no_cards_added_until_now">No cards added until now</string>
+    <string name="add_new_card">Add new card</string>
 </resources>

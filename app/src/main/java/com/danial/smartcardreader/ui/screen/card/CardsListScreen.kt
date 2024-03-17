@@ -15,18 +15,20 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.model.MessageModel
 import com.danial.smartcardreader.ui.customView.CustomAppBar
@@ -39,7 +41,7 @@ import com.danial.smartcardreader.ui.utils.FilePath
 @Composable
 @Preview
 fun CardsListScreenPreview() {
-    SmartCardReaderTheme(darkTheme = false) {
+    SmartCardReaderTheme(darkTheme = true) {
         val cardsList = listOf(
             CardItemModel(
                 label = "Pasargad",
@@ -49,7 +51,7 @@ fun CardsListScreenPreview() {
         )
         ContentView(
             isLoading = false,
-            cardsList = cardsList,
+            cardsList = /*cardsList*/emptyList(),
             addNewItem = {},
             deleteItem = {}
         )
@@ -149,11 +151,14 @@ private fun ContentView(
                 title = "Cards list",
             )
         }, content = {
-            Box(Modifier.padding(it)) {
+            Box(
+                Modifier
+                    .padding(it)
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
                 ) {
                     cardsList?.forEach { cardItem ->
                         CardItem(
@@ -163,6 +168,15 @@ private fun ContentView(
                             })
                     }
                 }
+
+                if (cardsList.isNullOrEmpty()) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = stringResource(R.string.no_cards_added_until_now),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+
                 FloatingActionButton(
                     onClick = addNewItem,
                     modifier = Modifier
@@ -171,18 +185,16 @@ private fun ContentView(
                 ) {
                     Icon(
                         painter = painterResource(id = android.R.drawable.ic_menu_add),
-                        contentDescription = "Add new card"
+                        contentDescription = stringResource(R.string.add_new_card)
                     )
                 }
+
                 if (isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = Color(0xC6FFFFFF))
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
-                    }
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(alignment = Alignment.Center),
+                    )
                 }
+
             }
         })
 }
