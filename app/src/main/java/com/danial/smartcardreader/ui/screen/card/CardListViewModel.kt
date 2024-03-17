@@ -44,14 +44,26 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         uiState.value.cardsList?.add(item)
         Hawk.put("cards_list", uiState.value.cardsList)
 
-        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
+        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList, addCardResult = null)
+    }
+
+    fun dismissAddCardDialog() {
+        _uiState.value = _uiState.value.copy(addCardResult = null)
+    }
+
+    fun confirmDeleteItem(item: CardItemModel) {
+        _uiState.value = _uiState.value.copy(itemForDelete = item)
+    }
+
+    fun dismissDeleteItem() {
+        _uiState.value = _uiState.value.copy(itemForDelete = null)
     }
 
     fun deleteItem(item: CardItemModel) {
         uiState.value.cardsList?.remove(item)
         Hawk.put("cards_list", uiState.value.cardsList)
 
-        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
+        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList, itemForDelete = null)
     }
 
 
@@ -82,9 +94,9 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                                 }
                                 if (cardNumber?.isNotEmpty() == true) {
                                     val cardItemModel = CardItemModel(number = cardNumber!!, sheba = shebaNumber)
-                                    _uiState.value = _uiState.value.copy(addCardResult = cardItemModel)
+                                    _uiState.value = _uiState.value.copy(addCardResult = cardItemModel, showLoading = false)
                                 } else {
-                                    _uiState.value = _uiState.value.copy(message = MessageModel.ServerError("OCR api did get any valuable response"))
+                                    _uiState.value = _uiState.value.copy(message = MessageModel.ServerError("OCR api did get any valuable response"), showLoading = false)
                                 }
                             }
                         }
@@ -122,7 +134,8 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
     data class CardListUIState(
         val showLoading: Boolean = false,
         val message: MessageModel? = null,
-        val cardsList: ArrayList<CardItemModel>? = null,
-        val addCardResult: CardItemModel? = null
+        val cardsList: ArrayList<CardItemModel>? = arrayListOf(),
+        val addCardResult: CardItemModel? = null,
+        val itemForDelete: CardItemModel? = null
     )
 }

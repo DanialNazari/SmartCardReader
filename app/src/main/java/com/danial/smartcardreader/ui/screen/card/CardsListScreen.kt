@@ -6,29 +6,33 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.model.MessageModel
 import com.danial.smartcardreader.ui.customView.CustomAppBar
 import com.danial.smartcardreader.ui.screen.card.widgets.AddCardItemDialog
 import com.danial.smartcardreader.ui.screen.card.widgets.CardItem
+import com.danial.smartcardreader.ui.screen.card.widgets.DeleteCardItemDialog
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.utils.FilePath
 
@@ -57,6 +61,8 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
 
     val activity = (LocalContext.current as Activity)
 
+    val uiState by viewModel.uiState.collectAsState()
+
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
             if (uriList.isNotEmpty()) {
@@ -65,27 +71,28 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
             }
         }
 
-    LaunchedEffect(key1 = viewModel.uiState) {
-        if (viewModel.uiState.value.message != null) {
-            val message = when (viewModel.uiState.value.message) {
+    LaunchedEffect(key1 = uiState) {
+        if (uiState.message != null) {
+            val message = when (uiState.message) {
                 is MessageModel.Message -> {
-                    (viewModel.uiState.value.message as MessageModel.Message).message
+                    (uiState.message as MessageModel.Message).message
                 }
 
                 is MessageModel.ServerError -> {
-                    (viewModel.uiState.value.message as MessageModel.ServerError).message
+                    (uiState.message as MessageModel.ServerError).message
                 }
 
                 is MessageModel.ConnectionError -> {
-                    (viewModel.uiState.value.message as MessageModel.ConnectionError).message
+                    (uiState.message as MessageModel.ConnectionError).message
                 }
 
                 is MessageModel.UnknownError -> {
-                    (viewModel.uiState.value.message as MessageModel.UnknownError).message
+                    (uiState.message as MessageModel.UnknownError).message
                 }
 
-                null -> {null}
+                null -> null
             }
+
             message?.let {
                 Toast.makeText(
                     activity, it, Toast.LENGTH_LONG
@@ -93,31 +100,36 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
             }
 
         }
+    }
 
-        if (viewModel.uiState.value.addCardResult != null) {
-            AddCardItemDialog(
-                onConfirm = {
-                    viewModel.addItem(viewModel.addCardResult.value!!.copy(label = it))
-                    viewModel.addCardResult.value = null
-                },
-                onDismissRequest = {
-                    viewModel.addCardResult.value = null
-                })
-        }
+    uiState.addCardResult?.let { cardItem ->
+        AddCardItemDialog(
+            onConfirm = {
+                viewModel.addItem(cardItem.copy(label = it))
+            },
+            onDismissRequest = {
+                viewModel.dismissAddCardDialog()
+            })
+    }
 
+    uiState.itemForDelete?.let {
+        DeleteCardItemDialog(
+            onConfirm = {
+                viewModel.deleteItem(it)
+            }, onDismissRequest = {
+                viewModel.dismissDeleteItem()
+            })
     }
 
     ContentView(
-        isLoading = viewModel.uiState.value.showLoading,
-        cardsList = viewModel.uiState.value.cardsList,
+        isLoading = uiState.showLoading,
+        cardsList = uiState.cardsList,
         addNewItem = {
             galleryLauncher.launch("image/*")
         },
         deleteItem = {
-            viewModel.deleteItem(it)
+            viewModel.confirmDeleteItem(it)
         })
-
-
 
 
 }
@@ -126,23 +138,10 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
 @Composable
 private fun ContentView(
     isLoading: Boolean,
-    cardsList: List<CardItemModel>,
+    cardsList: List<CardItemModel>?,
     addNewItem: () -> Unit,
     deleteItem: (CardItemModel) -> Unit
 ) {
-
-    var itemForDelete: CardItemModel? by remember { mutableStateOf(null) }
-
-    itemForDelete?.let {
-        DeleteItemDialog(
-            onConfirmation = {
-                deleteItem(it)
-                itemForDelete = null
-            }, onDismissRequest = {
-                itemForDelete = null
-            })
-    }
-
 
     Scaffold(
         topBar = {
@@ -153,14 +152,14 @@ private fun ContentView(
             Box(Modifier.padding(it)) {
                 Column(
                     Modifier
-                        .fillMaxHeight()
+                        .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
                 ) {
-                    cardsList.forEach { cardItem ->
+                    cardsList?.forEach { cardItem ->
                         CardItem(
                             cardItem = cardItem,
                             onDeleteItemClicked = {
-                                itemForDelete = cardItem
+                                deleteItem(cardItem)
                             })
                     }
                 }
@@ -186,37 +185,4 @@ private fun ContentView(
                 }
             }
         })
-}
-
-@Composable
-private fun DeleteItemDialog(onConfirmation: () -> Unit, onDismissRequest: () -> Unit) {
-    AlertDialog(
-        title = {
-            Text(text = stringResource(id = R.string.delete_item))
-        },
-        text = {
-            Text(text = stringResource(id = R.string.delete_item_desc))
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Confirm", color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Dismiss")
-            }
-        }
-    )
 }
