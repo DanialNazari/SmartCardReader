@@ -2,4 +2,9 @@
     <string name="app_name">Smart Card Reader</string>
     <string name="delete_item">Delete Item</string>
     <string name="delete_item_desc">Do you want delete this item?</string>
+    <string name="card_details">Card details</string>
+    <string name="cards_list">Cards list</string>
+    <string name="no_card_added_yet">No card added yet!</string>
+    <string name="add_new_card">Add new card</string>
+    <string name="label">Label</string>
 </resources>

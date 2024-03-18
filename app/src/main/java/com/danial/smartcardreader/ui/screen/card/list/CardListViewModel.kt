@@ -1,8 +1,5 @@
-package com.danial.smartcardreader.ui.screen.card
+package com.danial.smartcardreader.ui.screen.card.list
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.danial.smartcardreader.model.CardItemModel
@@ -32,26 +29,38 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
     }
 
     private fun getCardListFromCache() {
-        uiState.value.cardsList?.clear()
+        uiState.value.cardsList.clear()
         Hawk.get<List<CardItemModel>>("cards_list")?.let {
-            uiState.value.cardsList?.addAll(it)
+            uiState.value.cardsList.addAll(it)
         }
 
         _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
     }
 
     fun addItem(item: CardItemModel) {
-        uiState.value.cardsList?.add(item)
+        uiState.value.cardsList.add(item)
         Hawk.put("cards_list", uiState.value.cardsList)
 
-        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
+        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList, itemForAdd = null)
+    }
+
+    fun dismissAddCardItem() {
+        _uiState.value = _uiState.value.copy(itemForAdd = null)
+    }
+
+    fun deleteItemConfirm(item: CardItemModel) {
+        _uiState.value = _uiState.value.copy(itemForDelete = item)
     }
 
     fun deleteItem(item: CardItemModel) {
-        uiState.value.cardsList?.remove(item)
+        uiState.value.cardsList.remove(item)
         Hawk.put("cards_list", uiState.value.cardsList)
 
-        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
+        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList, itemForDelete = null)
+    }
+
+    fun dismissDeleteItem() {
+        _uiState.value = _uiState.value.copy(itemForDelete = null)
     }
 
 
@@ -82,9 +91,9 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                                 }
                                 if (cardNumber?.isNotEmpty() == true) {
                                     val cardItemModel = CardItemModel(number = cardNumber!!, sheba = shebaNumber)
-                                    _uiState.value = _uiState.value.copy(addCardResult = cardItemModel)
+                                    _uiState.value = _uiState.value.copy(itemForAdd = cardItemModel, showLoading = false)
                                 } else {
-                                    _uiState.value = _uiState.value.copy(message = MessageModel.ServerError("OCR api did get any valuable response"))
+                                    _uiState.value = _uiState.value.copy(message = MessageModel.ServerError("OCR api did get any valuable response"), showLoading = false)
                                 }
                             }
                         }
@@ -119,10 +128,16 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         }
     }
 
+    fun getCardItem(id: String?): CardItemModel? {
+        return uiState.value.cardsList.find { it.id == id }
+    }
+
+
     data class CardListUIState(
         val showLoading: Boolean = false,
         val message: MessageModel? = null,
-        val cardsList: ArrayList<CardItemModel>? = null,
-        val addCardResult: CardItemModel? = null
+        val cardsList: ArrayList<CardItemModel> = arrayListOf(),
+        val itemForAdd: CardItemModel? = null,
+        val itemForDelete: CardItemModel? = null
     )
 }

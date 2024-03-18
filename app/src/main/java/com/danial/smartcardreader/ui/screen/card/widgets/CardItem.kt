@@ -25,7 +25,11 @@ import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.widgets.CustomText
 
 @Composable
-fun CardItem(cardItem: CardItemModel, onDeleteItemClicked: () -> Unit) {
+fun CardItem(
+    cardItem: CardItemModel,
+    onItemClicked: () -> Unit,
+    onDeleteItemClicked: () -> Unit
+) {
     Box(
         modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -44,6 +48,9 @@ fun CardItem(cardItem: CardItemModel, onDeleteItemClicked: () -> Unit) {
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(16.dp)
+                .clickable {
+                    onItemClicked()
+                }
         ) {
             Column(
                 modifier = Modifier
@@ -89,6 +96,7 @@ fun CardItemPreview() {
             number = "3354778566954411",
             sheba = "IR3354778566954411"
         ),
+            onItemClicked = {},
             onDeleteItemClicked = {}
         )
     }

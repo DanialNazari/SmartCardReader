@@ -1,4 +1,4 @@
-package com.danial.smartcardreader.ui.screen.card
+package com.danial.smartcardreader.ui.screen.card.list
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -10,13 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,6 +25,7 @@ import com.danial.smartcardreader.model.MessageModel
 import com.danial.smartcardreader.ui.customView.CustomAppBar
 import com.danial.smartcardreader.ui.screen.card.widgets.AddCardItemDialog
 import com.danial.smartcardreader.ui.screen.card.widgets.CardItem
+import com.danial.smartcardreader.ui.screen.card.widgets.DeleteCardItemDialog
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.utils.FilePath
 
@@ -36,7 +33,7 @@ import com.danial.smartcardreader.ui.utils.FilePath
 @Preview
 fun CardsListScreenPreview() {
     SmartCardReaderTheme(darkTheme = false) {
-        val cardsList = listOf(
+        val cardsList = arrayListOf(
             CardItemModel(
                 label = "Pasargad",
                 number = "50222912365455588",
@@ -46,6 +43,7 @@ fun CardsListScreenPreview() {
         ContentView(
             isLoading = false,
             cardsList = cardsList,
+            onItemClicked = {},
             addNewItem = {},
             deleteItem = {}
         )
@@ -53,9 +51,13 @@ fun CardsListScreenPreview() {
 }
 
 @Composable
-fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
+fun CardsListScreen(
+    viewModel: CardListViewModel = hiltViewModel(),
+    onNavigateToCardItemScreen: (cardItemModel: CardItemModel) -> Unit
+) {
 
     val activity = (LocalContext.current as Activity)
+    val uiState = viewModel.uiState.collectAsState()
 
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
@@ -84,7 +86,9 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
                     (viewModel.uiState.value.message as MessageModel.UnknownError).message
                 }
 
-                null -> {null}
+                null -> {
+                    null
+                }
             }
             message?.let {
                 Toast.makeText(
@@ -94,30 +98,39 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
 
         }
 
-        if (viewModel.uiState.value.addCardResult != null) {
-            AddCardItemDialog(
-                onConfirm = {
-                    viewModel.addItem(viewModel.addCardResult.value!!.copy(label = it))
-                    viewModel.addCardResult.value = null
-                },
-                onDismissRequest = {
-                    viewModel.addCardResult.value = null
-                })
-        }
 
     }
 
+    uiState.value.itemForAdd?.let { cardItem ->
+        AddCardItemDialog(
+            onConfirm = {
+                viewModel.addItem(cardItem.copy(label = it))
+            },
+            onDismissRequest = {
+                viewModel.dismissAddCardItem()
+            })
+    }
+
+    uiState.value.itemForDelete?.let { cardItem ->
+        DeleteCardItemDialog(
+            onConfirm = {
+                viewModel.deleteItem(cardItem)
+            }, onDismissRequest = {
+                viewModel.dismissDeleteItem()
+            })
+    }
+
+
     ContentView(
-        isLoading = viewModel.uiState.value.showLoading,
-        cardsList = viewModel.uiState.value.cardsList,
+        isLoading = uiState.value.showLoading,
+        cardsList = uiState.value.cardsList,
+        onItemClicked = onNavigateToCardItemScreen,
         addNewItem = {
             galleryLauncher.launch("image/*")
         },
         deleteItem = {
-            viewModel.deleteItem(it)
+            viewModel.deleteItemConfirm(it)
         })
-
-
 
 
 }
@@ -126,41 +139,36 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
 @Composable
 private fun ContentView(
     isLoading: Boolean,
-    cardsList: List<CardItemModel>,
+    cardsList: ArrayList<CardItemModel>?,
+    onItemClicked: (cardItemModel: CardItemModel) -> Unit,
     addNewItem: () -> Unit,
     deleteItem: (CardItemModel) -> Unit
 ) {
-
-    var itemForDelete: CardItemModel? by remember { mutableStateOf(null) }
-
-    itemForDelete?.let {
-        DeleteItemDialog(
-            onConfirmation = {
-                deleteItem(it)
-                itemForDelete = null
-            }, onDismissRequest = {
-                itemForDelete = null
-            })
-    }
 
 
     Scaffold(
         topBar = {
             CustomAppBar(
-                title = "Cards list",
+                title = stringResource(R.string.cards_list),
             )
         }, content = {
-            Box(Modifier.padding(it)) {
+            Box(
+                Modifier
+                    .padding(it)
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
                 Column(
                     Modifier
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.background)
+                        .fillMaxSize()
                 ) {
-                    cardsList.forEach { cardItem ->
+                    cardsList?.forEach { cardItem ->
                         CardItem(
                             cardItem = cardItem,
+                            onItemClicked = {
+                                onItemClicked(cardItem)
+                            },
                             onDeleteItemClicked = {
-                                itemForDelete = cardItem
+                                deleteItem(cardItem)
                             })
                     }
                 }
@@ -172,51 +180,19 @@ private fun ContentView(
                 ) {
                     Icon(
                         painter = painterResource(id = android.R.drawable.ic_menu_add),
-                        contentDescription = "Add new card"
+                        contentDescription = stringResource(R.string.add_new_card)
+                    )
+                }
+                if (cardsList.isNullOrEmpty()) {
+                    Text(
+                        modifier = Modifier.align(alignment = Alignment.Center),
+                        text = stringResource(R.string.no_card_added_yet),
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
                 if (isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = Color(0xC6FFFFFF))
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
-                    }
+                    CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
                 }
             }
         })
-}
-
-@Composable
-private fun DeleteItemDialog(onConfirmation: () -> Unit, onDismissRequest: () -> Unit) {
-    AlertDialog(
-        title = {
-            Text(text = stringResource(id = R.string.delete_item))
-        },
-        text = {
-            Text(text = stringResource(id = R.string.delete_item_desc))
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Confirm", color = MaterialTheme.colorScheme.error)
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Dismiss")
-            }
-        }
-    )
 }
