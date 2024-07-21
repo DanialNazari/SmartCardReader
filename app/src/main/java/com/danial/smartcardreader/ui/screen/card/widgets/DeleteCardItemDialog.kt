@@ -9,6 +9,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.danial.smartcardreader.R
 
+
+@Composable
+@Preview
+private fun Preview() {
+    DeleteCardItemDialog(
+        onConfirm = {},
+        onDismissRequest = {}
+    )
+}
+
 @Composable
 fun DeleteCardItemDialog(onConfirm: () -> Unit, onDismissRequest: () -> Unit) {
     AlertDialog(
@@ -23,9 +33,7 @@ fun DeleteCardItemDialog(onConfirm: () -> Unit, onDismissRequest: () -> Unit) {
         },
         confirmButton = {
             TextButton(
-                onClick = {
-                    onConfirm()
-                }
+                onClick = onConfirm
             ) {
                 Text("Confirm", color = MaterialTheme.colorScheme.error)
             }
@@ -39,14 +47,5 @@ fun DeleteCardItemDialog(onConfirm: () -> Unit, onDismissRequest: () -> Unit) {
                 Text("Dismiss")
             }
         }
-    )
-}
-
-@Composable
-@Preview
-private fun Preview() {
-    DeleteCardItemDialog(
-        onConfirm = {},
-        onDismissRequest = {}
     )
 }

@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,8 +42,8 @@ import com.danial.smartcardreader.ui.utils.FilePath
 @Composable
 @Preview
 fun CardsListScreenPreview() {
-    SmartCardReaderTheme(darkTheme = true) {
-        val cardsList = listOf(
+    SmartCardReaderTheme(darkTheme = false) {
+        val cardsList = arrayListOf(
             CardItemModel(
                 label = "Pasargad",
                 number = "50222912365455588",
@@ -52,6 +53,7 @@ fun CardsListScreenPreview() {
         ContentView(
             isLoading = false,
             cardsList = cardsList,
+            onItemClicked = {},
             addNewItem = {},
             deleteItem = {}
         )
@@ -59,12 +61,14 @@ fun CardsListScreenPreview() {
 }
 
 @Composable
-fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
+fun CardsListScreen(
+    viewModel: CardListViewModel = hiltViewModel(),
+    onNavigateToCardItemScreen: (cardItemModel: CardItemModel) -> Unit
+) {
 
     val activity = (LocalContext.current as Activity)
-
-    val uiState by viewModel.uiState.collectAsState()
-
+    val uiState = viewModel.uiState.collectAsState()
+    
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
             if (uriList.isNotEmpty()) {
@@ -106,33 +110,38 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
         }
     }
 
-    uiState.addCardResult?.let { cardItem ->
+
+    }
+
+    uiState.value.itemForAdd?.let { cardItem ->
         AddCardItemDialog(
             onConfirm = {
                 viewModel.addItem(cardItem.copy(label = it))
             },
             onDismissRequest = {
-                viewModel.dismissAddCardDialog()
+                viewModel.dismissAddCardItem()
             })
     }
 
-    uiState.itemForDelete?.let {
+    uiState.value.itemForDelete?.let { cardItem ->
         DeleteCardItemDialog(
             onConfirm = {
-                viewModel.deleteItem(it)
+                viewModel.deleteItem(cardItem)
             }, onDismissRequest = {
                 viewModel.dismissDeleteItem()
             })
     }
 
+
     ContentView(
-        isLoading = uiState.showLoading,
-        cardsList = uiState.cardsList,
+        isLoading = uiState.value.showLoading,
+        cardsList = uiState.value.cardsList,
+        onItemClicked = onNavigateToCardItemScreen,
         addNewItem = {
             galleryLauncher.launch("image/*")
         },
         deleteItem = {
-            viewModel.confirmDeleteItem(it)
+            viewModel.deleteItemConfirm(it)
         })
 
 
@@ -142,15 +151,17 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
 @Composable
 private fun ContentView(
     isLoading: Boolean,
-    cardsList: List<CardItemModel>?,
+    cardsList: ArrayList<CardItemModel>?,
+    onItemClicked: (cardItemModel: CardItemModel) -> Unit,
     addNewItem: () -> Unit,
     deleteItem: (CardItemModel) -> Unit
 ) {
 
+
     Scaffold(
         topBar = {
             CustomAppBar(
-                title = "Cards list",
+                title = stringResource(R.string.cards_list),
             )
         }, content = {
             Box(
@@ -165,6 +176,9 @@ private fun ContentView(
                     cardsList?.forEach { cardItem ->
                         CardItem(
                             cardItem = cardItem,
+                            onItemClicked = {
+                                onItemClicked(cardItem)
+                            },
                             onDeleteItemClicked = {
                                 deleteItem(cardItem)
                             })
@@ -190,13 +204,17 @@ private fun ContentView(
                         contentDescription = stringResource(R.string.add_new_card)
                     )
                 }
-
-                if (isLoading) {
-                    CircularProgressIndicator(
+                if (cardsList.isNullOrEmpty()) {
+                    Text(
                         modifier = Modifier.align(alignment = Alignment.Center),
+                        text = stringResource(R.string.no_card_added_yet),
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
 
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+                }
             }
         })
 }
