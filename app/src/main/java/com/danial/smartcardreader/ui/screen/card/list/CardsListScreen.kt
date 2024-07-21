@@ -67,7 +67,7 @@ fun CardsListScreen(
 ) {
 
     val activity = (LocalContext.current as Activity)
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState = viewModel.uiState.collectAsState().value
     
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
@@ -111,9 +111,7 @@ fun CardsListScreen(
     }
 
 
-    }
-
-    uiState.value.itemForAdd?.let { cardItem ->
+    uiState.itemForAdd?.let { cardItem ->
         AddCardItemDialog(
             onConfirm = {
                 viewModel.addItem(cardItem.copy(label = it))
@@ -123,7 +121,7 @@ fun CardsListScreen(
             })
     }
 
-    uiState.value.itemForDelete?.let { cardItem ->
+    uiState.itemForDelete?.let { cardItem ->
         DeleteCardItemDialog(
             onConfirm = {
                 viewModel.deleteItem(cardItem)
@@ -134,8 +132,8 @@ fun CardsListScreen(
 
 
     ContentView(
-        isLoading = uiState.value.showLoading,
-        cardsList = uiState.value.cardsList,
+        isLoading = uiState.showLoading,
+        cardsList = uiState.cardsList,
         onItemClicked = onNavigateToCardItemScreen,
         addNewItem = {
             galleryLauncher.launch("image/*")
@@ -187,8 +185,8 @@ private fun ContentView(
 
                 if (!isLoading && cardsList.isNullOrEmpty()) {
                     Text(
-                        modifier = Modifier.align(Alignment.Center),
-                        text = stringResource(R.string.no_cards_added_until_now),
+                        modifier = Modifier.align(alignment = Alignment.Center),
+                        text = stringResource(R.string.no_card_added_yet),
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
@@ -202,13 +200,6 @@ private fun ContentView(
                     Icon(
                         painter = painterResource(id = android.R.drawable.ic_menu_add),
                         contentDescription = stringResource(R.string.add_new_card)
-                    )
-                }
-                if (cardsList.isNullOrEmpty()) {
-                    Text(
-                        modifier = Modifier.align(alignment = Alignment.Center),
-                        text = stringResource(R.string.no_card_added_yet),
-                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
 

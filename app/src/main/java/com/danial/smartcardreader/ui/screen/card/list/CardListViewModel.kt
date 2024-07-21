@@ -69,35 +69,23 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
             cardListRepository.parsImage(file).collect {
                 when (it) {
                     is ViewState.Success -> {
-                        _uiState.value = _uiState.value.copy(showLoading = true)
-
-                        val textRecognitionResponseModel: TextRecognitionResponseModel =
-                            it.data as TextRecognitionResponseModel
-                        if (!textRecognitionResponseModel.ParsedResults.isNullOrEmpty()) {
-                            textRecognitionResponseModel.ParsedResults[0]?.let { parsedResults ->
-                                val lines = parsedResults.ParsedText?.replace(" ", "")?.split("\r\n")
-                                var cardNumber: String? = null
-                                var shebaNumber: String? = null
-                                lines?.forEach { line ->
-
-                                    if (line.isNotEmpty()) {
-                                        if (line.length == 16) {
-                                            cardNumber = line
-                                        } else if (line.substring(0, 2) == "IR") {
-                                            shebaNumber = line
-                                        }
-                                    }
-
-                                }
-                                if (cardNumber?.isNotEmpty() == true) {
-                                    val cardItemModel = CardItemModel(number = cardNumber!!, sheba = shebaNumber)
-                                    _uiState.value = _uiState.value.copy(itemForAdd = cardItemModel, showLoading = false)
-                                } else {
-                                    _uiState.value = _uiState.value.copy(message = MessageModel.ServerError("OCR api did get any valuable response"), showLoading = false)
-                                }
-                            }
+                        val (cardNumber, shebaNumber) = getCardData(it.data)
+                        if (cardNumber?.isNotEmpty() == true) {
+                            val cardItemModel =
+                                CardItemModel(number = cardNumber, sheba = shebaNumber)
+                            _uiState.value = _uiState.value.copy(
+                                addCardResult = cardItemModel,
+                                showLoading = false
+                            )
+                        } else {
+                            val errorMessage = getErrorData(it.data)
+                            _uiState.value = _uiState.value.copy(
+                                message = MessageModel.ServerError(
+                                    errorMessage ?: "OCR api did get any valuable response"
+                                ),
+                                showLoading = false
+                            )
                         }
-
                     }
 
                     is ViewState.Loading -> {
@@ -132,12 +120,48 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         return uiState.value.cardsList.find { it.id == id }
     }
 
+    private fun getCardData(textRecognitionResponseModel: TextRecognitionResponseModel?): Pair<String?, String?> {
+        var cardNumber: String? = null
+        var shebaNumber: String? = null
+
+        textRecognitionResponseModel?.ParsedResults?.get(0)?.let { parsedResults ->
+            val lines = parsedResults.ParsedText?.replace(" ", "")?.split("\r\n")
+
+            lines?.forEach { line ->
+                if (line.isNotEmpty()) {
+                    if (line.length == 16) {
+                        cardNumber = line
+                    } else if (line.substring(0, 2) == "IR") {
+                        shebaNumber = line
+                    }
+                }
+            }
+        }
+        return Pair(cardNumber, shebaNumber)
+    }
+
+    private fun getErrorData(textRecognitionResponseModel: TextRecognitionResponseModel?): String? {
+        var errorMessage: String? = null
+        textRecognitionResponseModel?.ErrorMessage?.get(0)?.let { error ->
+            errorMessage = error
+        }
+        return errorMessage
+    }
+
+    fun clearMessage() {
+        _uiState.value =
+            _uiState.value.copy(message = null)
+    }
+
 
     data class CardListUIState(
         val showLoading: Boolean = false,
         val message: MessageModel? = null,
         val cardsList: ArrayList<CardItemModel> = arrayListOf(),
+        val addCardResult: CardItemModel? = null,
         val itemForAdd: CardItemModel? = null,
         val itemForDelete: CardItemModel? = null
     )
+
+
 }
