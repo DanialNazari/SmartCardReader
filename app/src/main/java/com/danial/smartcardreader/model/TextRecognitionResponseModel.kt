@@ -5,7 +5,8 @@ data class TextRecognitionResponseModel(
     val OCRExitCode: Int? = null,
     val ParsedResults: List<ParsedResult?>? = null,
     val ProcessingTimeInMilliseconds: String? = null,
-    val SearchablePDFURL: String? = null
+    val SearchablePDFURL: String? = null,
+    val ErrorMessage: List<String>? = null
 ) {
     data class ParsedResult(
         val ErrorDetails: String? = null,

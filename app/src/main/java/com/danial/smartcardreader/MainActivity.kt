@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.danial.smartcardreader.ui.screen.card.CardsListScreen
+import com.danial.smartcardreader.ui.screen.card.list.CardsListScreen
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.utils.ContextUtils
 import dagger.hilt.android.AndroidEntryPoint

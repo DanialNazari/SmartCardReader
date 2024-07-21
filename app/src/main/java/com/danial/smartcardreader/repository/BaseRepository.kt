@@ -10,7 +10,7 @@ import retrofit2.HttpException
 
 open class BaseRepository{
 
-    protected fun checkResponseError(responseException:Exception): ViewState<Any> {
+    protected fun <T> checkResponseError(responseException:Exception): ViewState<T> {
         try {
             if(responseException is HttpException){
                 val jsonString = responseException.response()?.errorBody()?.string()

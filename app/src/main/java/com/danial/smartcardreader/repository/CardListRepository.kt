@@ -27,22 +27,17 @@ class CardListRepository @Inject constructor(
 ) : BaseRepository() {
 
 
-    fun parsImage(file: File): Flow<ViewState<Any>> = flow {
-
+    fun parsImage(file: File): Flow<ViewState<TextRecognitionResponseModel>> = flow {
+        emit(ViewState.Loading)
         val request: MultipartBody.Part = MultipartBody.Part.createFormData(
             name = "file",
             filename = file.name,
             body = file.asRequestBody()
         )
-
-        emit(ViewState.Loading)
-
         if (context.isNetworkAvailable()) {
             try {
-
                 val response = api.parsImage(request)
                 emit(ViewState.Success(response))
-
             } catch (e: Exception) {
                 emit(checkResponseError(e))
             }
@@ -51,12 +46,7 @@ class CardListRepository @Inject constructor(
         }
 
         // mock data
-        /*emit(
-            ViewState.Success(
-                data = mockData
-            )
-        )*/
-
+        /*emit(ViewState.Success(data = mockData))*/
 
     }.flowOn(ioDispatcher).catch { Timber.e(it) }
 

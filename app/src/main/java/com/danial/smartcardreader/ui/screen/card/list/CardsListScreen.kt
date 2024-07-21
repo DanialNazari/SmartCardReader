@@ -1,4 +1,4 @@
-package com.danial.smartcardreader.ui.screen.card
+package com.danial.smartcardreader.ui.screen.card.list
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -51,7 +51,7 @@ fun CardsListScreenPreview() {
         )
         ContentView(
             isLoading = false,
-            cardsList = /*cardsList*/emptyList(),
+            cardsList = cardsList,
             addNewItem = {},
             deleteItem = {}
         )
@@ -73,7 +73,7 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
             }
         }
 
-    LaunchedEffect(key1 = uiState) {
+    LaunchedEffect(key1 = uiState.message) {
         if (uiState.message != null) {
             val message = when (uiState.message) {
                 is MessageModel.Message -> {
@@ -92,15 +92,17 @@ fun CardsListScreen(viewModel: CardListViewModel = hiltViewModel()) {
                     (uiState.message as MessageModel.UnknownError).message
                 }
 
-                null -> null
+                null -> {
+                    null
+                }
             }
 
-            message?.let {
+            message.let {
                 Toast.makeText(
                     activity, it, Toast.LENGTH_LONG
                 ).show()
             }
-
+            viewModel.clearMessage()
         }
     }
 
@@ -169,7 +171,7 @@ private fun ContentView(
                     }
                 }
 
-                if (cardsList.isNullOrEmpty()) {
+                if (!isLoading && cardsList.isNullOrEmpty()) {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
                         text = stringResource(R.string.no_cards_added_until_now),
