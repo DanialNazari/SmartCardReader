@@ -63,6 +63,13 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         _uiState.value = _uiState.value.copy(itemForDelete = null)
     }
 
+    fun showSelectImageSourceBottomSheet() {
+        _uiState.value = _uiState.value.copy(selectImageSource = true)
+    }
+    fun dismissSelectImageSourceBottomSheet() {
+        _uiState.value = _uiState.value.copy(selectImageSource = false)
+    }
+
 
     fun parseImage(file: File) {
         viewModelScope.launch {
@@ -160,8 +167,12 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         val cardsList: ArrayList<CardItemModel> = arrayListOf(),
         val addCardResult: CardItemModel? = null,
         val itemForAdd: CardItemModel? = null,
-        val itemForDelete: CardItemModel? = null
+        val itemForDelete: CardItemModel? = null,
+        val selectImageSource: Boolean? = false
     )
 
+    enum class ImageSource{
+        GALLERY, CAMERA
+    }
 
 }

@@ -19,8 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +34,7 @@ import com.danial.smartcardreader.ui.customView.CustomAppBar
 import com.danial.smartcardreader.ui.screen.card.widgets.AddCardItemDialog
 import com.danial.smartcardreader.ui.screen.card.widgets.CardItem
 import com.danial.smartcardreader.ui.screen.card.widgets.DeleteCardItemDialog
+import com.danial.smartcardreader.ui.screen.card.widgets.SelectImageSourceBottomSheet
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.utils.FilePath
 
@@ -68,7 +67,7 @@ fun CardsListScreen(
 
     val activity = (LocalContext.current as Activity)
     val uiState = viewModel.uiState.collectAsState().value
-    
+
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
             if (uriList.isNotEmpty()) {
@@ -81,19 +80,19 @@ fun CardsListScreen(
         if (uiState.message != null) {
             val message = when (uiState.message) {
                 is MessageModel.Message -> {
-                    (uiState.message as MessageModel.Message).message
+                    uiState.message.message
                 }
 
                 is MessageModel.ServerError -> {
-                    (uiState.message as MessageModel.ServerError).message
+                    uiState.message.message
                 }
 
                 is MessageModel.ConnectionError -> {
-                    (uiState.message as MessageModel.ConnectionError).message
+                    uiState.message.message
                 }
 
                 is MessageModel.UnknownError -> {
-                    (uiState.message as MessageModel.UnknownError).message
+                    uiState.message.message
                 }
 
                 null -> {
@@ -130,13 +129,38 @@ fun CardsListScreen(
             })
     }
 
+    uiState.itemForDelete?.let { cardItem ->
+        DeleteCardItemDialog(
+            onConfirm = {
+                viewModel.deleteItem(cardItem)
+            }, onDismissRequest = {
+                viewModel.dismissDeleteItem()
+            })
+    }
+
+    uiState.selectImageSource?.let { it ->
+        if (it) {
+            SelectImageSourceBottomSheet(
+                onImageSourceSelected = {
+                    if (it == CardListViewModel.ImageSource.GALLERY) {
+                        galleryLauncher.launch("image/*")
+                    } else if (it == CardListViewModel.ImageSource.CAMERA) {
+                        galleryLauncher.launch("image/*")
+                    }
+                    viewModel.dismissSelectImageSourceBottomSheet()
+                }, onDismissRequest = {
+                    viewModel.dismissSelectImageSourceBottomSheet()
+                })
+        }
+    }
+
 
     ContentView(
         isLoading = uiState.showLoading,
         cardsList = uiState.cardsList,
         onItemClicked = onNavigateToCardItemScreen,
         addNewItem = {
-            galleryLauncher.launch("image/*")
+            viewModel.showSelectImageSourceBottomSheet()
         },
         deleteItem = {
             viewModel.deleteItemConfirm(it)
