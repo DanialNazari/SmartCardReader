@@ -2,6 +2,7 @@ package com.danial.smartcardreader.ui.screen.card.list
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -74,58 +79,36 @@ fun CardsListScreen(
 
     val uiState = viewModel.uiState.collectAsState().value
 
-    val galleryLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
-            if (uriList.isNotEmpty()) {
-                val file = FilePath.getFile(activity, uriList[0])
-                viewModel.parseImage(file)
-            }
-        }
+    var uri by remember {
+        mutableStateOf<Uri?>(null)
+    }
 
-    val tempFile = context.createImageFile()
-    val uri = FileProvider.getUriForFile(Objects.requireNonNull(context), BuildConfig.APPLICATION_ID + ".fileprovider", tempFile)
-
-    val cameraLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { result ->
-            if (result) {
-                val file = FilePath.getFile(activity, uri)
-                viewModel.parseImage(file)
-            }
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { result ->
+        if (result && uri != null) {
+            val file = FilePath.getFile(activity, uri)
+            viewModel.parseImage(file)
         }
+        viewModel.dismissOnSelectedAsImageSource()
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
+        if (uriList.isNotEmpty()) {
+            val file = FilePath.getFile(activity, uriList[0])
+            viewModel.parseImage(file)
+        }
+        viewModel.dismissOnSelectedAsImageSource()
+    }
 
     LaunchedEffect(key1 = uiState.message) {
-        if (uiState.message != null) {
-            val message = when (uiState.message) {
-                is MessageModel.Message -> {
-                    uiState.message.message
-                }
-
-                is MessageModel.ServerError -> {
-                    uiState.message.message
-                }
-
-                is MessageModel.ConnectionError -> {
-                    uiState.message.message
-                }
-
-                is MessageModel.UnknownError -> {
-                    uiState.message.message
-                }
-
-                null -> {
-                    null
-                }
-            }
-
-            message?.let {
+        uiState.message?.let { messageModel ->
+            messageModel.msg.let {
                 Toast.makeText(
-                    activity, it.resolve(context = context), Toast.LENGTH_LONG
+                    activity, it.resolve(context), Toast.LENGTH_LONG
                 ).show()
             }
             viewModel.clearMessage()
         }
     }
-
 
     uiState.itemForAdd?.let { cardItem ->
         AddCardItemDialog(
@@ -134,10 +117,12 @@ fun CardsListScreen(
             },
             onDismissRequest = {
                 viewModel.dismissAddCardItem()
-            })
+            }
+        )
     }
 
     uiState.itemForDelete?.let { cardItem ->
+
         DeleteCardItemDialog(
             onConfirm = {
                 viewModel.deleteItem(cardItem)
@@ -146,13 +131,24 @@ fun CardsListScreen(
             })
     }
 
+    if (uiState.onCameraSelectedAsImageSource) {
+        val tempFile = context.createImageFile()
+        val fileUri = FileProvider.getUriForFile(Objects.requireNonNull(context), BuildConfig.APPLICATION_ID + ".fileprovider", tempFile)
+        uri = fileUri
+        cameraLauncher.launch(fileUri)
+    }
+
+    if (uiState.onGallerySelectedAsImageSource) {
+        galleryLauncher.launch("image/*")
+    }
+
     if (uiState.showImageSourceSelectionDialog) {
         SelectImageSourceBottomSheet(
             onCameraSelected = {
-                cameraLauncher.launch(uri)
+                viewModel.onCameraSelectAsImageSource()
             },
             onGallerySelected = {
-                galleryLauncher.launch("image/*")
+                viewModel.onGallerySelectAsImageSource()
             },
             onDismiss = {
                 viewModel.dismissImageSourceSelectionDialog()
@@ -182,7 +178,6 @@ private fun ContentView(
     addNewItem: () -> Unit,
     deleteItem: (CardItemModel) -> Unit
 ) {
-
 
     Scaffold(
         topBar = {
@@ -237,3 +232,4 @@ private fun ContentView(
             }
         })
 }
+

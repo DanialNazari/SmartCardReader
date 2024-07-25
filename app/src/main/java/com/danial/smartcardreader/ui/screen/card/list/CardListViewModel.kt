@@ -12,7 +12,6 @@ import com.orhanobut.hawk.Hawk
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -22,27 +21,26 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
     ViewModel() {
 
     private var _uiState = MutableStateFlow(CardListUIState())
-    val uiState: StateFlow<CardListUIState>
-        get() = _uiState.asStateFlow()
+    val uiState : StateFlow<CardListUIState> = _uiState
 
     init {
         getCardListFromCache()
     }
 
     private fun getCardListFromCache() {
-        uiState.value.cardsList.clear()
+        _uiState.value.cardsList.clear()
         Hawk.get<List<CardItemModel>>("cards_list")?.let {
-            uiState.value.cardsList.addAll(it)
+            _uiState.value.cardsList.addAll(it)
         }
 
-        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList)
+        _uiState.value = _uiState.value.copy(cardsList = _uiState.value.cardsList)
     }
 
     fun addItem(item: CardItemModel) {
-        uiState.value.cardsList.add(item)
-        Hawk.put("cards_list", uiState.value.cardsList)
+        _uiState.value.cardsList.add(item)
+        Hawk.put("cards_list", _uiState.value.cardsList)
 
-        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList, itemForAdd = null)
+        _uiState.value = _uiState.value.copy(cardsList = _uiState.value.cardsList, itemForAdd = null)
     }
 
     fun dismissAddCardItem() {
@@ -54,10 +52,10 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
     }
 
     fun deleteItem(item: CardItemModel) {
-        uiState.value.cardsList.remove(item)
-        Hawk.put("cards_list", uiState.value.cardsList)
+        _uiState.value.cardsList.remove(item)
+        Hawk.put("cards_list", _uiState.value.cardsList)
 
-        _uiState.value = _uiState.value.copy(cardsList = uiState.value.cardsList, itemForDelete = null)
+        _uiState.value = _uiState.value.copy(cardsList = _uiState.value.cardsList, itemForDelete = null)
     }
 
     fun dismissDeleteItem() {
@@ -69,22 +67,7 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
             cardListRepository.parsImage(file).collect {
                 when (it) {
                     is ViewState.Success -> {
-                        val (cardNumber, shebaNumber) = getCardData(it.data)
-                        if (cardNumber?.isNotEmpty() == true) {
-                            val cardItemModel =
-                                CardItemModel(number = cardNumber, sheba = shebaNumber)
-                            _uiState.value = _uiState.value.copy(
-                                addCardResult = cardItemModel,
-                                showLoading = false
-                            )
-                        } else {
-                            val errorMessage = getErrorData(it.data)
-                            _uiState.value = _uiState.value.copy(
-                                message = MessageModel.ServerError(StringResource.Text(errorMessage ?: "OCR api did get any valuable response")
-                                ),
-                                showLoading = false
-                            )
-                        }
+                        handleParseImageSuccessState(it)
                     }
 
                     is ViewState.Loading -> {
@@ -115,8 +98,27 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         }
     }
 
+    private fun handleParseImageSuccessState(it: ViewState.Success<TextRecognitionResponseModel>) {
+        val (cardNumber, shebaNumber) = getCardData(it.data)
+        if (cardNumber?.isNotEmpty() == true) {
+            val cardItemModel = CardItemModel(number = cardNumber, sheba = shebaNumber)
+            _uiState.value = _uiState.value.copy(
+                itemForAdd = cardItemModel,
+                showLoading = false
+            )
+        } else {
+            val errorMessage = getErrorData(it.data)
+            _uiState.value = _uiState.value.copy(
+                message = MessageModel.ServerError(
+                    StringResource.Text(errorMessage ?: "OCR api did get any valuable response")
+                ),
+                showLoading = false
+            )
+        }
+    }
+
     fun getCardItem(id: String?): CardItemModel? {
-        return uiState.value.cardsList.find { it.id == id }
+        return _uiState.value.cardsList.find { it.id == id }
     }
 
     private fun getCardData(textRecognitionResponseModel: TextRecognitionResponseModel?): Pair<String?, String?> {
@@ -148,16 +150,26 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
     }
 
     fun clearMessage() {
-        _uiState.value =
-            _uiState.value.copy(message = null)
+        _uiState.value = _uiState.value.copy(message = null)
     }
 
     fun showImageSourceSelectionDialog() {
-        _uiState.value =  _uiState.value.copy(showImageSourceSelectionDialog = true)
+        _uiState.value = _uiState.value.copy(showImageSourceSelectionDialog = true)
     }
 
     fun dismissImageSourceSelectionDialog() {
         _uiState.value = _uiState.value.copy(showImageSourceSelectionDialog = false)
+    }
+
+    fun onCameraSelectAsImageSource() {
+        _uiState.value = _uiState.value.copy(onCameraSelectedAsImageSource = true, showImageSourceSelectionDialog = false)
+    }
+    fun onGallerySelectAsImageSource() {
+        _uiState.value = _uiState.value.copy(onGallerySelectedAsImageSource = true, showImageSourceSelectionDialog = false)
+    }
+
+    fun dismissOnSelectedAsImageSource() {
+        _uiState.value = _uiState.value.copy(onCameraSelectedAsImageSource = false, onGallerySelectedAsImageSource = false, )
     }
 
 
@@ -168,8 +180,10 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         val addCardResult: CardItemModel? = null,
         val itemForAdd: CardItemModel? = null,
         val itemForDelete: CardItemModel? = null,
-        val showImageSourceSelectionDialog: Boolean = false
+        val showImageSourceSelectionDialog: Boolean = false,
 
+        val onCameraSelectedAsImageSource: Boolean = false,
+        val onGallerySelectedAsImageSource: Boolean = false
     )
 
 
