@@ -6,6 +6,7 @@ import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.model.MessageModel
 import com.danial.smartcardreader.model.TextRecognitionResponseModel
 import com.danial.smartcardreader.repository.CardListRepository
+import com.danial.smartcardreader.ui.utils.StringResource
 import com.danial.smartcardreader.ui.utils.ViewState
 import com.orhanobut.hawk.Hawk
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,7 +64,6 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         _uiState.value = _uiState.value.copy(itemForDelete = null)
     }
 
-
     fun parseImage(file: File) {
         viewModelScope.launch {
             cardListRepository.parsImage(file).collect {
@@ -93,7 +93,7 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                                     val cardItemModel = CardItemModel(number = cardNumber!!, sheba = shebaNumber)
                                     _uiState.value = _uiState.value.copy(itemForAdd = cardItemModel, showLoading = false)
                                 } else {
-                                    _uiState.value = _uiState.value.copy(message = MessageModel.ServerError("OCR api did get any valuable response"), showLoading = false)
+                                    _uiState.value = _uiState.value.copy(message = MessageModel.ServerError(StringResource.Text("OCR api did get any valuable response")), showLoading = false)
                                 }
                             }
                         }
@@ -105,7 +105,7 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                     }
 
                     is ViewState.Error -> {
-                        _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.Message(it.message))
+                        _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.Message(StringResource.Text(it.message)))
                     }
 
                     is ViewState.ConnectionError -> {
@@ -116,7 +116,7 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                         if (it.errors.isNullOrEmpty()) {
                             _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.ServerError())
                         } else {
-                            _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.ServerError(it.errors[0]?.error ?: "Unknown Server Error"))
+                            _uiState.value = _uiState.value.copy(showLoading = false, message = MessageModel.ServerError(StringResource.Text(it.errors[0]?.error ?: "Unknown Server Error")))
                         }
                     }
 
@@ -132,12 +132,22 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         return uiState.value.cardsList.find { it.id == id }
     }
 
+    fun showImageSourceSelectionDialog() {
+        _uiState.value =  _uiState.value.copy(showImageSourceSelectionDialog = true)
+    }
+
+    fun dismissImageSourceSelectionDialog() {
+        _uiState.value = _uiState.value.copy(showImageSourceSelectionDialog = false)
+    }
+
 
     data class CardListUIState(
         val showLoading: Boolean = false,
         val message: MessageModel? = null,
         val cardsList: ArrayList<CardItemModel> = arrayListOf(),
         val itemForAdd: CardItemModel? = null,
-        val itemForDelete: CardItemModel? = null
+        val itemForDelete: CardItemModel? = null,
+        val showImageSourceSelectionDialog: Boolean = false
+
     )
 }

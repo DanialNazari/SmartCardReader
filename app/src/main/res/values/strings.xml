@@ -7,4 +7,7 @@
     <string name="no_card_added_yet">No card added yet!</string>
     <string name="add_new_card">Add new card</string>
     <string name="label">Label</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+    <string name="select_image_source">Select Image source</string>
 </resources>

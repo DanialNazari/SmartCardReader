@@ -4,6 +4,9 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 
 @Suppress("DEPRECATION")
 fun Context.isNetworkAvailable(): Boolean {
@@ -25,4 +28,16 @@ fun Context.isNetworkAvailable(): Boolean {
         val nwInfo = connectivityManager.activeNetworkInfo ?: return false
         return nwInfo.isConnected
     }
+}
+
+fun Context.createImageFile(): File {
+    // Create an image file name
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+    val imageFileName = "JPEG_" + timeStamp + "_"
+    val image = File.createTempFile(
+        imageFileName, /* prefix */
+        ".jpg", /* suffix */
+        externalCacheDir      /* directory */
+    )
+    return image
 }
