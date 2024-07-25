@@ -19,8 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,7 +32,6 @@ import com.danial.smartcardreader.BuildConfig
 import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.model.MessageModel
-import com.danial.smartcardreader.ui.widgets.CustomAppBar
 import com.danial.smartcardreader.ui.screen.card.widgets.AddCardItemDialog
 import com.danial.smartcardreader.ui.screen.card.widgets.CardItem
 import com.danial.smartcardreader.ui.screen.card.widgets.DeleteCardItemDialog
@@ -42,6 +39,7 @@ import com.danial.smartcardreader.ui.screen.image.SelectImageSourceBottomSheet
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.utils.FilePath
 import com.danial.smartcardreader.ui.utils.createImageFile
+import com.danial.smartcardreader.ui.widgets.CustomAppBar
 import java.util.Objects
 
 @Composable
@@ -74,7 +72,7 @@ fun CardsListScreen(
     val activity = (LocalContext.current as Activity)
     val context = LocalContext.current
 
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState = viewModel.uiState.collectAsState().value
 
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
@@ -85,10 +83,7 @@ fun CardsListScreen(
         }
 
     val tempFile = context.createImageFile()
-    val uri = FileProvider.getUriForFile(
-        Objects.requireNonNull(context),
-        BuildConfig.APPLICATION_ID + ".fileprovider", tempFile
-    )
+    val uri = FileProvider.getUriForFile(Objects.requireNonNull(context), BuildConfig.APPLICATION_ID + ".fileprovider", tempFile)
 
     val cameraLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { result ->
@@ -102,19 +97,19 @@ fun CardsListScreen(
         if (uiState.message != null) {
             val message = when (uiState.message) {
                 is MessageModel.Message -> {
-                    (uiState.message as MessageModel.Message).message
+                    uiState.message.message
                 }
 
                 is MessageModel.ServerError -> {
-                    (uiState.message as MessageModel.ServerError).message
+                    uiState.message.message
                 }
 
                 is MessageModel.ConnectionError -> {
-                    (uiState.message as MessageModel.ConnectionError).message
+                    uiState.message.message
                 }
 
                 is MessageModel.UnknownError -> {
-                    (uiState.message as MessageModel.UnknownError).message
+                    uiState.message.message
                 }
 
                 null -> {
@@ -122,7 +117,7 @@ fun CardsListScreen(
                 }
             }
 
-            message.let {
+            message?.let {
                 Toast.makeText(
                     activity, it.resolve(context = context), Toast.LENGTH_LONG
                 ).show()
@@ -151,7 +146,7 @@ fun CardsListScreen(
             })
     }
 
-    if (uiState.value.showImageSourceSelectionDialog) {
+    if (uiState.showImageSourceSelectionDialog) {
         SelectImageSourceBottomSheet(
             onCameraSelected = {
                 cameraLauncher.launch(uri)

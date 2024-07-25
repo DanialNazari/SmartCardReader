@@ -80,8 +80,7 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
                         } else {
                             val errorMessage = getErrorData(it.data)
                             _uiState.value = _uiState.value.copy(
-                                message = MessageModel.ServerError(
-                                    errorMessage ?: "OCR api did get any valuable response"
+                                message = MessageModel.ServerError(StringResource.Text(errorMessage ?: "OCR api did get any valuable response")
                                 ),
                                 showLoading = false
                             )

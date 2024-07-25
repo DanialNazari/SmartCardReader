@@ -7,6 +7,7 @@ import android.os.Build
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 @Suppress("DEPRECATION")
 fun Context.isNetworkAvailable(): Boolean {
@@ -31,13 +32,7 @@ fun Context.isNetworkAvailable(): Boolean {
 }
 
 fun Context.createImageFile(): File {
-    // Create an image file name
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-    val imageFileName = "JPEG_" + timeStamp + "_"
-    val image = File.createTempFile(
-        imageFileName, /* prefix */
-        ".jpg", /* suffix */
-        externalCacheDir      /* directory */
-    )
-    return image
+    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+    val storageDir: File? = cacheDir
+    return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
 }
