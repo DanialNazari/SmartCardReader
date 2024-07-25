@@ -28,16 +28,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.danial.smartcardreader.BuildConfig
 import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.model.MessageModel
-import com.danial.smartcardreader.ui.customView.CustomAppBar
+import com.danial.smartcardreader.ui.widgets.CustomAppBar
 import com.danial.smartcardreader.ui.screen.card.widgets.AddCardItemDialog
 import com.danial.smartcardreader.ui.screen.card.widgets.CardItem
 import com.danial.smartcardreader.ui.screen.card.widgets.DeleteCardItemDialog
+import com.danial.smartcardreader.ui.screen.image.SelectImageSourceBottomSheet
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.utils.FilePath
+import com.danial.smartcardreader.ui.utils.createImageFile
+import java.util.Objects
 
 @Composable
 @Preview
@@ -67,12 +72,28 @@ fun CardsListScreen(
 ) {
 
     val activity = (LocalContext.current as Activity)
-    val uiState = viewModel.uiState.collectAsState().value
-    
+    val context = LocalContext.current
+
+    val uiState = viewModel.uiState.collectAsState()
+
     val galleryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uriList ->
             if (uriList.isNotEmpty()) {
                 val file = FilePath.getFile(activity, uriList[0])
+                viewModel.parseImage(file)
+            }
+        }
+
+    val tempFile = context.createImageFile()
+    val uri = FileProvider.getUriForFile(
+        Objects.requireNonNull(context),
+        BuildConfig.APPLICATION_ID + ".fileprovider", tempFile
+    )
+
+    val cameraLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { result ->
+            if (result) {
+                val file = FilePath.getFile(activity, uri)
                 viewModel.parseImage(file)
             }
         }
@@ -103,7 +124,7 @@ fun CardsListScreen(
 
             message.let {
                 Toast.makeText(
-                    activity, it, Toast.LENGTH_LONG
+                    activity, it.resolve(context = context), Toast.LENGTH_LONG
                 ).show()
             }
             viewModel.clearMessage()
@@ -130,13 +151,25 @@ fun CardsListScreen(
             })
     }
 
+    if (uiState.value.showImageSourceSelectionDialog) {
+        SelectImageSourceBottomSheet(
+            onCameraSelected = {
+                cameraLauncher.launch(uri)
+            },
+            onGallerySelected = {
+                galleryLauncher.launch("image/*")
+            },
+            onDismiss = {
+                viewModel.dismissImageSourceSelectionDialog()
+            })
+    }
 
     ContentView(
         isLoading = uiState.showLoading,
         cardsList = uiState.cardsList,
         onItemClicked = onNavigateToCardItemScreen,
         addNewItem = {
-            galleryLauncher.launch("image/*")
+            viewModel.showImageSourceSelectionDialog()
         },
         deleteItem = {
             viewModel.deleteItemConfirm(it)

@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.danial.smartcardreader.R
 import com.danial.smartcardreader.model.CardItemModel
-import com.danial.smartcardreader.ui.customView.CustomAppBar
+import com.danial.smartcardreader.ui.widgets.CustomAppBar
 import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
 
 @Composable

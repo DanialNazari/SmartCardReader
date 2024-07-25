@@ -1,4 +1,4 @@
-package com.danial.smartcardreader.ui.customView
+package com.danial.smartcardreader.ui.widgets
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
