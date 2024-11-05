@@ -4,3 +4,4 @@ This app is a sample project being developed by Kotlin and Jetpack compose
 
 <b>Technologies used in this project:</b>
 - Jetpack compose
+- Version catalog
