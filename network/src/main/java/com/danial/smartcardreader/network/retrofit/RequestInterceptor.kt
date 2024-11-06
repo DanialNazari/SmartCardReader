@@ -1,6 +1,6 @@
-package com.danial.smartcardreader.network
+package com.danial.smartcardreader.network.retrofit
 
-import com.danial.smartcardreader.BuildConfig
+import com.danial.smartcardreader.network.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.Response
 import timber.log.Timber

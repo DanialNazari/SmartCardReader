@@ -1,4 +1,4 @@
-package com.danial.smartcardreader.model
+package com.danial.smartcardreader.network.model
 
 data class TextRecognitionResponseModel(
     val IsErroredOnProcessing: Boolean? = null,

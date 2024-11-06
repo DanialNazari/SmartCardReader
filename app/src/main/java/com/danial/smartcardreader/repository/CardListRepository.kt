@@ -2,8 +2,8 @@ package com.danial.smartcardreader.repository
 
 import android.content.Context
 import com.danial.smartcardreader.di.IoDispatcher
-import com.danial.smartcardreader.model.TextRecognitionResponseModel
-import com.danial.smartcardreader.network.ApiService
+import com.danial.smartcardreader.network.model.TextRecognitionResponseModel
+import com.danial.smartcardreader.network.retrofit.ApiService
 import com.danial.smartcardreader.ui.utils.ViewState
 import com.danial.smartcardreader.ui.utils.isNetworkAvailable
 import kotlinx.coroutines.CoroutineDispatcher

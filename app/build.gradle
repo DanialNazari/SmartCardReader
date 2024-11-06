@@ -7,13 +7,13 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
     namespace "com.danial.smartcardreader"
 
     defaultConfig {
         applicationId "com.danial.smartcardreader"
         minSdk 21
-        targetSdk 34
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 
@@ -62,6 +62,8 @@ android {
 
 dependencies {
 
+    implementation project(':network')
+
     implementation libs.androidx.ktx
     implementation libs.ui
     implementation libs.ui.tooling
@@ -83,13 +85,13 @@ dependencies {
 
     // Hilt
     implementation libs.hilt.android
-    implementation libs.androidx.hilt.navigation.compose
     kapt libs.hilt.android.compiler
+    implementation libs.androidx.hilt.navigation.compose
 
     // network
-    implementation libs.logging.interceptor
-    implementation libs.converter.gson
-    implementation libs.retrofit.mock
+    implementation (libs.logging.interceptor)
+    implementation (libs.converter.gson)
+    implementation (libs.retrofit.mock)
 
     // coroutines
     implementation libs.kotlinx.coroutines.android

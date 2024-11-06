@@ -10,7 +10,6 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ContextModule {
-
     @Binds
     internal abstract fun bindContext(application: Application): Context
 }
