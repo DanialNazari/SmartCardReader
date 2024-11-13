@@ -14,5 +14,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Smart Card Reader"
 include ':app'
+include ':feature'
+include ':feature:cardslist'
 include ':core'
-include ':network'
+include ':core:network'

@@ -2,8 +2,8 @@ package com.danial.smartcardreader.repository
 
 import android.content.Context
 import com.danial.smartcardreader.di.IoDispatcher
-import com.danial.smartcardreader.network.model.TextRecognitionResponseModel
-import com.danial.smartcardreader.network.retrofit.ApiService
+import com.danial.network.model.TextRecognitionResponseModel
+import com.danial.network.retrofit.ApiService
 import com.danial.smartcardreader.ui.utils.ViewState
 import com.danial.smartcardreader.ui.utils.isNetworkAvailable
 import kotlinx.coroutines.CoroutineDispatcher
@@ -38,6 +38,7 @@ class CardListRepository @Inject constructor(
                 val response = api.parsImage(request)
                 emit(ViewState.Success(response))
             } catch (e: Exception) {
+                e.printStackTrace()
                 emit(checkResponseError(e))
             }
         } else {

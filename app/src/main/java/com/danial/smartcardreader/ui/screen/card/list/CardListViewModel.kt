@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.model.MessageModel
-import com.danial.smartcardreader.network.model.TextRecognitionResponseModel
+import com.danial.network.model.TextRecognitionResponseModel
 import com.danial.smartcardreader.repository.CardListRepository
 import com.danial.smartcardreader.ui.utils.StringResource
 import com.danial.smartcardreader.ui.utils.ViewState

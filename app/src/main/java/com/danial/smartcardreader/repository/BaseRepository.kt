@@ -31,7 +31,6 @@ open class BaseRepository{
             val errors = convertStringToArrayError(jsonString)
             ViewState.ServerError(code,errors)
         }
-
     }
 
     private fun convertStringToError(jsonString:String?): ErrorResponseModel {
