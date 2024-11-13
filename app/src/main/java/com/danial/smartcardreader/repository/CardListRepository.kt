@@ -18,7 +18,6 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 @Singleton
 class CardListRepository @Inject constructor(
     private val api: ApiService,
@@ -52,9 +51,9 @@ class CardListRepository @Inject constructor(
 
 
     private val mockData = TextRecognitionResponseModel(
-        ParsedResults = arrayListOf(
-            TextRecognitionResponseModel.ParsedResult(ParsedText = "5022291307412589"),
-            TextRecognitionResponseModel.ParsedResult(ParsedText = "IR502229130741258914523698")
+        parsedResults = arrayListOf(
+            TextRecognitionResponseModel.ParsedResult(parsedText = "5022291307412589"),
+            TextRecognitionResponseModel.ParsedResult(parsedText = "IR502229130741258914523698")
         )
     )
 

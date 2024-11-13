@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.danial.smartcardreader.model.CardItemModel
 import com.danial.smartcardreader.model.MessageModel
+import com.danial.smartcardreader.network.model.TextRecognitionResponseModel
 import com.danial.smartcardreader.repository.CardListRepository
 import com.danial.smartcardreader.ui.utils.StringResource
 import com.danial.smartcardreader.ui.utils.ViewState
@@ -124,8 +125,8 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         var cardNumber: String? = null
         var shebaNumber: String? = null
 
-        textRecognitionResponseModel?.ParsedResults?.get(0)?.let { parsedResults ->
-            val lines = parsedResults.ParsedText?.replace(" ", "")?.split("\r\n")
+        textRecognitionResponseModel?.parsedResults?.get(0)?.let { parsedResults ->
+            val lines = parsedResults.parsedText?.replace(" ", "")?.split("\r\n")
 
             lines?.forEach { line ->
                 if (line.isNotEmpty()) {
@@ -142,7 +143,7 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
 
     private fun getErrorData(textRecognitionResponseModel: TextRecognitionResponseModel?): String? {
         var errorMessage: String? = null
-        textRecognitionResponseModel?.ErrorMessage?.get(0)?.let { error ->
+        textRecognitionResponseModel?.errorMessage?.get(0)?.let { error ->
             errorMessage = error
         }
         return errorMessage
@@ -184,6 +185,5 @@ class CardListViewModel @Inject constructor(private val cardListRepository: Card
         val onCameraSelectedAsImageSource: Boolean = false,
         val onGallerySelectedAsImageSource: Boolean = false
     )
-
 
 }

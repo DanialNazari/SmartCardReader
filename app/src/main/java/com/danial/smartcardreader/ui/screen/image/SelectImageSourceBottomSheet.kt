@@ -72,14 +72,14 @@ private fun Content(
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .padding(bottom = 24.dp),
+            .padding(bottom = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = stringResource(R.string.select_image_source))
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp), Arrangement.SpaceEvenly
+                .padding(top = 24.dp), Arrangement.SpaceEvenly
         ) {
             Button(onClick = {
                 onCameraSelected()
