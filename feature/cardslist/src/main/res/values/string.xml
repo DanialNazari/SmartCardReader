@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="card_details">Card details</string>
+    <string name="cards_list">Cards list</string>
+    <string name="label">Label</string>
+</resources>

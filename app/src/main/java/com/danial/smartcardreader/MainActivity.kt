@@ -14,10 +14,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.danial.smartcardreader.ui.screen.card.item.CardsItemScreen
-import com.danial.smartcardreader.ui.screen.card.list.CardListViewModel
+import com.danial.smartcardreader.cardslist.item.CardsItemScreen
+import com.danial.smartcardreader.cardslist.list.CardListViewModel
 import com.danial.smartcardreader.ui.screen.card.list.CardsListScreen
-import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
+import com.danial.smartcardreader.designsystem.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.utils.ContextUtils
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                                 CardsListScreen(
                                     viewModel = cardListViewModel,
                                     onNavigateToCardItemScreen = {
-                                        navController.navigate("cardItem/"+it.id)
+                                        navController.navigate("cardItem/" + it.id)
                                     }
                                 )
                             }

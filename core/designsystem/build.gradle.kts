@@ -1,16 +1,14 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
-    namespace = "com.danial.cardslist"
+    namespace = "com.example.designsystem"
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 21
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -26,24 +24,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    buildFeatures {
-        compose = true
-        buildConfig = true
+        jvmTarget = "1.8"
     }
 }
 
 dependencies {
-
-    implementation(project(":core:network"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":core:data"))
 
     implementation(libs.androidx.ktx)
     implementation(libs.androidx.appcompat)
@@ -52,19 +41,12 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation(libs.material)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.material)
+    implementation (libs.material)
+    implementation (libs.androidx.material3)
+    implementation (libs.androidx.material)
 
-    debugImplementation(libs.ui.tooling)
-
-    implementation(libs.androidx.activity.compose)
     implementation(libs.ui)
     implementation(libs.ui.tooling)
     implementation(libs.ui.tooling.preview)
-
-    implementation (libs.hilt.android)
-    implementation (libs.androidx.hilt.navigation.compose)
-    kapt (libs.hilt.android.compiler)
-
+    
 }

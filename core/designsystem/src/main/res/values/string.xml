@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="select_image_source">Select Image source</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
+</resources>
