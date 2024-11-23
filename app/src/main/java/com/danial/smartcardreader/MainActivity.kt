@@ -16,7 +16,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.danial.smartcardreader.cardslist.item.CardsItemScreen
 import com.danial.smartcardreader.cardslist.list.CardListViewModel
-import com.danial.smartcardreader.ui.screen.card.list.CardsListScreen
+import com.danial.smartcardreader.cardslist.list.CardsListScreen
 import com.danial.smartcardreader.designsystem.theme.SmartCardReaderTheme
 import com.danial.smartcardreader.ui.utils.ContextUtils
 import dagger.hilt.android.AndroidEntryPoint

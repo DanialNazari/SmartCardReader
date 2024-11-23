@@ -1,4 +1,4 @@
-package com.danial.smartcardreader.ui.screen.card.widgets
+package com.danial.smartcardreader.cardslist.widgets
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.danial.smartcardreader.ui.widgets.CustomTextFiled
+import com.danial.smartcardreader.designsystem.components.CustomTextFiled
 
 @Composable
 fun AddCardItemDialog(

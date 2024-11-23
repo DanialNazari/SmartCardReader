@@ -19,10 +19,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.danial.smartcardreader.R
-import com.danial.smartcardreader.model.CardItemModel
-import com.danial.smartcardreader.ui.theme.SmartCardReaderTheme
-import com.danial.smartcardreader.ui.widgets.CustomText
+import com.danial.cardslist.R
+import com.danial.network.model.CardItemModel
+import com.danial.smartcardreader.designsystem.components.CustomText
+import com.danial.smartcardreader.designsystem.theme.SmartCardReaderTheme
 
 @Composable
 fun CardItem(
@@ -68,7 +68,7 @@ fun CardItem(
                 Text(text = cardItem.number, color = MaterialTheme.colorScheme.onSurface)
 
                 if (cardItem.sheba != null) {
-                    Text(text = cardItem.sheba, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                    Text(text = cardItem.sheba!!, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                 }
 
             }
@@ -91,11 +91,12 @@ fun CardItem(
 @Preview
 fun CardItemPreview() {
     SmartCardReaderTheme(darkTheme = true) {
-        CardItem(CardItemModel(
-            label = "Pasargad",
-            number = "3354778566954411",
-            sheba = "IR3354778566954411"
-        ),
+        CardItem(
+            CardItemModel(
+                label = "Pasargad",
+                number = "3354778566954411",
+                sheba = "IR3354778566954411"
+            ),
             onItemClicked = {},
             onDeleteItemClicked = {}
         )

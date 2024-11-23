@@ -1,4 +1,4 @@
-package com.danial.smartcardreader.ui.screen.card.list
+package com.danial.smartcardreader.cardslist.list
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -31,24 +31,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.danial.cardslist.R
 import com.danial.network.model.CardItemModel
-import com.danial.smartcardreader.BuildConfig
-import com.danial.smartcardreader.R
-import com.danial.smartcardreader.cardslist.list.CardListViewModel
 import com.danial.smartcardreader.cardslist.widgets.CardItem
 import com.danial.smartcardreader.data.util.createImageFile
-import com.danial.smartcardreader.designsystem.components.SelectImageSourceBottomSheet
+import com.danial.smartcardreader.designsystem.components.CustomAppBar
 import com.danial.smartcardreader.designsystem.theme.SmartCardReaderTheme
-import com.danial.smartcardreader.ui.screen.card.widgets.AddCardItemDialog
-import com.danial.smartcardreader.ui.screen.card.widgets.DeleteCardItemDialog
-import com.danial.smartcardreader.ui.screen.image.SelectImageSourceBottomSheet
-import com.danial.smartcardreader.ui.utils.FilePath
-import com.danial.smartcardreader.ui.utils.createImageFile
-import com.danial.smartcardreader.ui.widgets.CustomAppBar
+import com.danial.smartcardreader.cardslist.widgets.AddCardItemDialog
+import com.danial.smartcardreader.cardslist.widgets.DeleteCardItemDialog
+import com.danial.smartcardreader.designsystem.components.SelectImageSourceBottomSheet
 import com.danial.smartcardreader.util.FilePath
-import java.util.Objects
 
 @Composable
 @Preview
@@ -106,7 +99,7 @@ fun CardsListScreen(
         uiState.message?.let { messageModel ->
             messageModel.msg.let {
                 Toast.makeText(
-                    activity, it.resolve(context), Toast.LENGTH_LONG
+                    activity, it, Toast.LENGTH_LONG
                 ).show()
             }
             viewModel.clearMessage()
@@ -136,9 +129,10 @@ fun CardsListScreen(
 
     if (uiState.onCameraSelectedAsImageSource) {
         val tempFile = context.createImageFile()
-        val fileUri = FileProvider.getUriForFile(Objects.requireNonNull(context), BuildConfig.APPLICATION_ID + ".fileprovider", tempFile)
-        uri = fileUri
-        cameraLauncher.launch(fileUri)
+        //todo: work on this later
+        //val fileUri = FileProvider.getUriForFile(Objects.requireNonNull(context), BuildConfig.APPLICATION_ID + ".fileprovider", tempFile)
+        //uri = fileUri
+        //cameraLauncher.launch(fileUri)
     }
 
     if (uiState.onGallerySelectedAsImageSource) {

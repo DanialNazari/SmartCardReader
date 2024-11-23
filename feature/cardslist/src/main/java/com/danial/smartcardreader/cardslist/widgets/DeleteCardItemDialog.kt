@@ -1,4 +1,4 @@
-package com.danial.smartcardreader.ui.screen.card.widgets
+package com.danial.smartcardreader.cardslist.widgets
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -7,7 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.danial.smartcardreader.R
+import com.danial.cardslist.R
 
 
 @Composable
